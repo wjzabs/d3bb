@@ -96,16 +96,16 @@ export class BaseballComponent implements OnInit {
     // let color = d3.scaleCategory20();
     let color = d3.scaleOrdinal(d3.schemeCategory10);
  
-    d3.csv("assets/Baseball.csv", (d: any) => {
-        d.y = +d["runs86"];
-        d.x = +d["atbat86"];
-        d.r = +d["homer86"];
-        return d;
-      }).then((data:any) => {
-        data.sort(function (a: any, b:any) { return b.r - a.r; });
-        that.createChart(data);
-        console.log(data)
-      }).catch (e => console.error(e));
+    // d3.csv("assets/Baseball.csv", (d: any) => {
+    //     d.y = +d["runs86"];
+    //     d.x = +d["atbat86"];
+    //     d.r = +d["homer86"];
+    //     return d;
+    //   }).then((data:any) => {
+    //     data.sort(function (a: any, b:any) { return b.r - a.r; });
+    //     that.createChart(data);
+    //     console.log(data)
+    //   }).catch (e => console.error(e));
 
       // data.sort(function(a,b) { return b.r - a.r; });
 
@@ -247,11 +247,11 @@ export class BaseballComponent implements OnInit {
           .style("opacity", 1);
       });
 
-  //   };    
-  // }
-
-
-    });    
+    };    
   }
-}
+
+
+//     });    
+//   }
+// }
 
