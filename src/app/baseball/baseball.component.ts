@@ -6,7 +6,8 @@ import * as d3 from 'd3';
   standalone: true,
   imports: [],
   templateUrl: './baseball.component.html',
-  styleUrl: './baseball.component.scss'
+  styleUrl: './baseball.component.scss',
+  encapsulation: ViewEncapsulation.None,
 })
 export class BaseballComponent implements OnInit {
 
@@ -139,7 +140,7 @@ export class BaseballComponent implements OnInit {
       .attr("r", function (d:stats) { return radius(d.r); })
       .style("fill", (d:stats) => { return color( d["team86"]) })
       .on("mouseover", (event: any, d:stats) => {
-        console.log(event, d);
+        // console.log(event, d);
         let player = d["name1"] + " " + d["name2"];
         d3.selectAll(".mytooltip")
           .html("<div>Player:" + player + "<br/><br/>"
@@ -152,7 +153,7 @@ export class BaseballComponent implements OnInit {
           .style("opacity", .9);
       })
       .on("mouseout", (event: any, d:stats) => {
-        console.log({event, d})
+        // console.log({event, d})
         d3.selectAll(".mytooltip")
           .transition().duration(600)
           .style("opacity", 0);
