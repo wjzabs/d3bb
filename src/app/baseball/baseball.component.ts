@@ -29,15 +29,16 @@ export class BaseballComponent implements OnInit {
         d.xaa = 0;
         d.yaa = 0;
       return d;
-    }).then((data:any) => {
+    }).then((data:stats[]) => {
       data.sort(function (a: any, b:any) { return b.r - a.r; });
       that.createChart(data);
       console.log(data)
-    }).catch (e => console.error(e))
+    }).catch (e => console.error(e))  
   }
 
 
-  createChart(data: any[]) {
+
+  createChart(data: stats[]) {
     let that = this;
 
     let margin = { top: 30, right: 50, bottom: 40, left: 50 };
@@ -83,36 +84,33 @@ export class BaseballComponent implements OnInit {
     let radius = d3.scaleSqrt()
       .range([2, 8]);
 
-    let xAxis = d3.axisBottom(xscale)
+    let xAxis = d3.axisBottom(xscale).tickSize(-height)
     // let xAxis = d3.axisBottom()
     //   .tickSize(-height)
     //   .scale(xscale);
 
-    let yAxis = d3.axisLeft(yscale)
+    let yAxis = d3.axisLeft(yscale).tickSize(-width)
     // let yAxis = d3.axisLeft()
     //   .tickSize(-width)
     //   .scale(yscale)
 
     // let color = d3.scaleCategory20();
     let color = d3.scaleOrdinal(d3.schemeCategory10);
- 
-    // d3.csv("assets/Baseball.csv", (d: any) => {
-    //     d.y = +d["runs86"];
-    //     d.x = +d["atbat86"];
-    //     d.r = +d["homer86"];
-    //     return d;
-    //   }).then((data:any) => {
-    //     data.sort(function (a: any, b:any) { return b.r - a.r; });
-    //     that.createChart(data);
-    //     console.log(data)
-    //   }).catch (e => console.error(e));
 
-      // data.sort(function(a,b) { return b.r - a.r; });
+    // https://snyk.io/advisor/npm-package/d3/functions/d3.extent
+    // const yDomain = d3.extent(data, d => d.y);
 
+    console.log({y: (d3.extent(data, (d:stats) => d.y))})
+    // yscale.domain(d3.extent(data, (d:stats) => d.y)).nice();
+    yscale.domain([0, 130])
 
-    // yscale.domain(d3.extent(data: any[], function (d) {
+    // yscale.domain(d3.extent(data, function (d) {
     //   return d.y;
     // })).nice();
+
+    console.log({r: (d3.extent(data, (d:stats) => d.r))})
+    // radius.domain(d3.extent(data, (d:stats) => d.r)).nice();
+    radius.domain([0, 40])
 
     // radius.domain(d3.extent(data: any[], function (d) {
     //   return d.r;
@@ -138,29 +136,27 @@ export class BaseballComponent implements OnInit {
 
     group
       .append("circle")
-      .attr("r", function (d) { return radius(d.r); })
-      // .style("fill", ((d:any) => {
-      //   return color(d["team86"]);
-      // })
-      // .on("mouseover", ((d:any) => {
-      //   // console.log(d3.event);
-      //   let player = d["name1"] + " " + d["name2"];
-      //   d3.selectAll(".mytooltip")
-      //     .html("<div>Player:" + player + "<br/><br/>"
-      //     + "<span>Runs:" + d["runs86"] + "</span>" + "<br/>"
-      //     + "<span>At-Bats:" + d["atbat86"] + "</span>" + "<br/>"
-      //     + "<span>Homers:" + d["homer86"] + "</span>" + "<br/>")
-      //     .style("left", function (d) { return d3.event.pageX + "px" })
-      //     .style("top", function (d) { return (d3.event.pageY - 120) + "px" })
-      //     .transition().duration(200)
-      //     .style("opacity", .9);
-      // })
-      // .on("mouseout", function (d) {
-      //   d3.selectAll(".mytooltip")
-      //     .transition().duration(600)
-      //     .style("opacity", 0);
-      // })
-
+      .attr("r", function (d:stats) { return radius(d.r); })
+      .style("fill", (d:stats) => { return color( d["team86"]) })
+      .on("mouseover", (event: any, d:stats) => {
+        console.log(event, d);
+        let player = d["name1"] + " " + d["name2"];
+        d3.selectAll(".mytooltip")
+          .html("<div>Player:" + player + "<br/><br/>"
+          + "<span>Runs:" + d["runs86"] + "</span>" + "<br/>"
+          + "<span>At-Bats:" + d["atbat86"] + "</span>" + "<br/>"
+          + "<span>Homers:" + d["homer86"] + "</span>" + "<br/>")
+          .style("left", function (d) { return event.pageX + "px" })
+          .style("top", function (d) { return (event.pageY - 120) + "px" })
+          .transition().duration(200)
+          .style("opacity", .9);
+      })
+      .on("mouseout", (event: any, d:stats) => {
+        console.log({event, d})
+        d3.selectAll(".mytooltip")
+          .transition().duration(600)
+          .style("opacity", 0);
+      })
 
     group
       .append("text")
@@ -221,7 +217,7 @@ export class BaseballComponent implements OnInit {
       .attr("x", width)
       .attr("width", 12)
       .attr("height", 12)
-      // .style("fill", color);
+      .style("fill", color);
 
     legend.append("text")
       .attr("x", width + 16)
@@ -246,12 +242,42 @@ export class BaseballComponent implements OnInit {
         d3.selectAll(".bubble")
           .style("opacity", 1);
       });
-
-    };    
   }
+}
 
+export interface stats {
 
-//     });    
-//   }
-// }
-
+  row: number;
+  name1: string;
+  name2: string;
+  atbat86: number;
+  hits86: number;
+  homer86: number;
+  runs86: number;
+  rbi86: number;
+  walks86: number;
+  years: number;
+  atbat: number;
+  hits: number;
+  homeruns: number;
+  runs: number;
+  rbi: number;
+  walks: number;
+  league86: string;
+  div86: string;
+  team86: string;
+  posit86: string;
+  outs86: number;
+  assist86: number;
+  error86: number;
+  sal87: number;
+  league87 :string;
+  team87: string;
+  y: number;
+  x: number;
+  r: number;
+  xa: number;
+  ya: number;
+  xaa: number;
+  yaa: number;
+}
