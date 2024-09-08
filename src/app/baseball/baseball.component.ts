@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import * as d3 from 'd3';
+import { drag } from 'd3';
 
 @Component({
   selector: 'app-baseball',
@@ -11,16 +12,20 @@ import * as d3 from 'd3';
 })
 export class BaseballComponent implements OnInit {
 
+  data: stats[] = [];
+
+
   constructor() { }
 
-  ngOnInit() {
-    this.getData();
+  async ngOnInit() {
+    await this.getData();
+    console.log(this.data)
   }
 
-  getData() {
+  async getData() {
     let that = this;
 
-    d3.csv("assets/Baseball.csv", (d: any) => {
+    await d3.csv("assets/Baseball.csv", (d: any) => {
       // console.log(data)
         d.y = +d["runs86"];
         d.x = +d["atbat86"];
@@ -31,10 +36,13 @@ export class BaseballComponent implements OnInit {
         d.yaa = 0;
       return d;
     }).then((data:stats[]) => {
+      this.data = data;
       data.sort(function (a: any, b:any) { return b.r - a.r; });
       that.createChart(data);
-      // console.log(data)
-    }).catch (e => console.error(e))  
+      console.log({data})
+    }).catch (e => console.error(e)) 
+    
+
   }
 
 
@@ -132,18 +140,28 @@ export class BaseballComponent implements OnInit {
       .enter().append("g")
       .attr("class", "bubble")
       .attr("transform", function (d) {
-        return "translate(" + xscale(d.x) + "," + yscale(d.y) + ")"
-      });
+        return "translate(" + xscale(d.x || 0) + "," + yscale(d.y || 0) + ")"
+      })
+      // .call(d3.drag()
+      // .on("start", dragstarted)
+      // .on("drag", (event: any, d: stats) => { d3.select(this).attr("cx", d.x = event.x).attr("cy", d.y = event.y); }))
+      // .on("end", () => { g.attr("cursor", "grab"); });
+
+      // svg.call(d3.zoom()
+      // .extent([[0, 0], [width, height]])
+      // .scaleExtent([1, 8])
+      // .on("zoom", zoomed));
 
     group
       .append("circle")
-      .attr("r", function (d:stats) { return radius(d.r); })
+      .attr("r", function (d:stats) { return radius(d.r || 0); })
       .style("fill", (d:stats) => { return color( d["team86"]) })
       .on("mouseover", (event: any, d:stats) => {
         // console.log(event, d);
         let player = d["name1"] + " " + d["name2"];
         d3.selectAll(".mytooltip")
           .html("<div>Player:" + player + "<br/><br/>"
+          + "<span>(x,y):" + ' (' + d["x"] +',' +  d["y"] + ')' + "</span>" + "<br/>"
           + "<span>Runs:" + d["runs86"] + "</span>" + "<br/>"
           + "<span>At-Bats:" + d["atbat86"] + "</span>" + "<br/>"
           + "<span>Homers:" + d["homer86"] + "</span>" + "<br/>")
@@ -161,39 +179,73 @@ export class BaseballComponent implements OnInit {
 
     group
       .append("text")
-      .attr("x", function (d) { return radius(d.r); })
+      .attr("x", function (d) { return radius(d.r || 0); })
       .attr("alignment-baseline", "middle")
       .text(function (d) {
         return d["name1"] + " " + d["name2"];
       });
 
     // group
-    //   .call(d3.drag()
-    //     .on("start", function (d: any, i) {
-    //       d3.select(this).raise().classed("drag-active", true);
-    //       d.xm0 = d3.event.x;
-    //       d.ym0 = d3.event.y;
-    //       d.xm1 = d3.event.x;
-    //       d.ym1 = d3.event.y;
-    //     }) // this.dragstarted)
-    //     .on("drag", function (d: any, i) {
-    //       console.log('drag started', d.xa, d.ya, d3.event);
-    //       d.xm1 = d3.event.x;
-    //       d.ym1 = d3.event.y;
-    //       d.xa = d.xm1 - d.xm0;
-    //       d.ya = d.ym1 - d.ym0;
-    //       d3.selectAll(".drag-active")
-    //         .attr("transform", function (d: any, i) {
-    //           return "translate(" + (xscale(d.x) + d.xaa + d.xa) + "," + (yscale(d.y) + d.yaa + d.ya) + ")"
-    //         })
-    //     }) // this.dragged)
-    //     .on("end", function (d: any, i) {
-    //       console.log('drag ended', d.xa, d.ya, d3.event)
-    //       d.xaa = d.xaa + d.xa;
-    //       d.yaa = d.yaa + d.ya;
-    //       d3.select(this).classed("drag-active", false);
-    //     }) // this.dragended))
-    //   )
+    //   .call(drag)
+    //   .on('drag', this.handleDrag)
+
+
+
+    group
+      .call(drag)
+        .on("drag", (e: DragEvent, d: stats) => {
+          // console.log(e, d);
+          // d.x = e.x
+          // d.y = e.y
+          // console.log(e.target.x, e.x);
+          // e.target.x = e.x;
+          // e.target.y = e.y;   
+          // this.update();   
+          
+            // .attr("transform", function (d) {
+            //   return "translate(" + xscale(d.x || 0) + "," + yscale(d.y || 0) + ")"
+            // })
+
+        })
+
+        // https://d3js.org/d3-drag#drag-events
+        // https://www.d3indepth.com/interaction/
+
+        
+    // group.call(drag)
+    //     .on("start", (e: DragEvent, d: stats) => {
+    //       console.log("drag started", e, d);
+    //       // d3.select(this).raise().classed("drag-active", true);
+    //       d.xm0 = e.x;
+    //       d.ym0 = e.y;
+    //       d.xm1 = e.x;
+    //       d.ym1 = e.y;
+    //     })
+    //     .on("drag", (e: DragEvent, d: stats) => {
+    //       console.log("drag-active", e, d);
+    //       d.xm1 = e.x;
+    //       d.ym1 = e.y;
+    //       if (d.xm0) {d.xa = d.xm1 - d.xm0};
+    //       if (d.ym0) {d.ya = d.ym1 - d.ym0};
+    //       d3.selectAll(".drag-active").attr("transform", (d: any, i) => {
+    //         return (
+    //           "translate(" +
+    //           (xscale(d.x) + d.xaa + d.xa) +
+    //           "," +
+    //           (yscale(d.y) + d.yaa + d.ya) +
+    //           ")"
+    //         );
+    //       });
+    //     })
+    //     .on("end", (e: DragEvent, d: stats) => {
+    //       console.log("drag ended", e, d);
+    //       d.xaa = (d.xaa || 0) + (d.xa || 0);
+    //       d.yaa = (d.yaa || 0) + (d.ya || 0);
+    //       // d3.select(this).classed("drag-active", false);
+    //     })
+    
+
+
 
     svg.append("text")
       .attr("x", 6)
@@ -242,6 +294,87 @@ export class BaseballComponent implements OnInit {
     });
 
   }
+
+  // drag = d3.drag()
+  //   .on("drag", (e) => {
+  //     // console.log(e);
+  //     // console.log(e.target.x, e.x);
+  //     e.target.x = e.x;
+  //     e.target.y = e.y;   
+  //     this.update();         
+  //   })
+    drag = d3.drag()
+    .on("drag", this.handleDrag)
+
+    handleDrag(e:any) {
+      console.log(typeof(e), e)
+      e.target.x = e.x;
+      e.target.y = e.y;
+      // this.update();
+
+      let margin = { top: 30, right: 50, bottom: 40, left: 50 };
+      let width = 960 - margin.left - margin.right;
+      let height = 500 - margin.top - margin.bottom;
+
+      let xscale = d3.scaleLinear()
+      .domain([0, 800])
+      .range([0, width]);
+
+      let yscale = d3.scaleLinear()
+        .range([height, 0]);
+
+      console.log(this.data)
+
+      d3.select('svg')
+      .selectAll("g.bubble")
+      .data(this.data)
+      .enter().append("g")
+      .attr("class", "bubble")
+      .attr("transform", function (d) {
+        return "translate(" + xscale(d.x || 0) + "," + yscale(d.y || 0) + ")"
+      });
+
+      // d3.select('svg')
+      // .selectAll('g.bubble')
+      // .data(this.data)
+      // .join('g.bubble')
+      // .attr('cx', (d: any) => { return d.x; })
+      // .attr('cy', (d: any) => { return d.y; })
+      // .attr('r', (d: any) => { return d.r; });
+    }
+
+  update() {
+    d3.select('svg')
+      .selectAll('circle')
+      .data(this.data)
+      .join('circle')
+      .attr('cx', (d: any) => { return d.x; })
+      .attr('cy', (d: any) => { return d.y; })
+      .attr('r', (d: any) => { return d.r; });
+  }
+
+
+
+// https://observablehq.com/@d3/drag-zoom
+
+  // dragstarted() {
+  //   d3.select(this).raise();
+  //   g.attr("cursor", "grabbing");
+  // }
+
+  // dragged(event: any, d: stats) {
+  //   d3.select(this).attr("cx", d.x = event.x).attr("cy", d.y = event.y);
+  // }
+
+  // dragended() {
+  //   g.attr("cursor", "grab");
+  // }
+
+  // zoomed({transform}: any) {
+  //   g.attr("transform", transform);
+  // }
+
+
 }
 
 export interface stats {
@@ -272,11 +405,15 @@ export interface stats {
   sal87: number;
   league87 :string;
   team87: string;
-  y: number;
-  x: number;
-  r: number;
-  xa: number;
-  ya: number;
-  xaa: number;
-  yaa: number;
+  y?: number;
+  x?: number;
+  r?: number;
+  xa?: number;
+  ya?: number;
+  xaa?: number;
+  yaa?: number;
+          xm0?: number;
+          ym0?: number;
+          xm1?: number;
+          ym1?: number;
 }
