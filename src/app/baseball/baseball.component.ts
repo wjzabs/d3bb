@@ -33,7 +33,7 @@ export class BaseballComponent implements OnInit {
     }).then((data:stats[]) => {
       data.sort(function (a: any, b:any) { return b.r - a.r; });
       that.createChart(data);
-      console.log(data)
+      // console.log(data)
     }).catch (e => console.error(e))  
   }
 
@@ -227,22 +227,20 @@ export class BaseballComponent implements OnInit {
       .style("text-anchor", "start")
       .text(function (d) { return d; });
 
-    legend.on("mouseover", function (type) {
-      d3.selectAll(".legend")
-        .style("opacity", 0.1);
-      d3.select(this)
-        .style("opacity", 1);
+    legend
+    .on("mouseover", (event: MouseEvent, type: string) => {
+      d3.selectAll(".legend").style("opacity", 0.1);
+      d3.selectAll(".legend").filter((d:any) => { return d === type; }).style("opacity", 1);
       d3.selectAll(".bubble")
         .style("opacity", 0.1)
-        .filter(function (d:any) { return d["team86"] == type; })
+        .filter((d:any) => { return d["team86"] === type; })
         .style("opacity", 1);
     })
-      .on("mouseout", function (type) {
-        d3.selectAll(".legend")
-          .style("opacity", 1);
-        d3.selectAll(".bubble")
-          .style("opacity", 1);
-      });
+    .on("mouseout", (event: any, type: string) => {
+      d3.selectAll(".legend").style("opacity", 1);
+      d3.selectAll(".bubble").style("opacity", 1);
+    });
+
   }
 }
 
