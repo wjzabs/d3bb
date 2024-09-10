@@ -2,6 +2,10 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import * as d3 from 'd3';
 import { drag } from 'd3';
 
+// https://sinequa.github.io/sba-angular/tipstricks/d3-angular.html
+// https://medium.com/netscape/visualizing-data-with-angular-and-d3-209dde784aeb
+// https://www.codecademy.com/resources/docs/d3/selection/csv
+
 @Component({
   selector: 'app-baseball',
   standalone: true,
