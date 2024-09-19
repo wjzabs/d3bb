@@ -198,7 +198,7 @@ export class BaseballComponent implements OnInit {
     group
       .call(drag)
         .on("drag", (e: DragEvent, d: stats) => {
-          // console.log(e, d);
+          console.log(e, d);
           // d.x = e.x
           // d.y = e.y
           // console.log(e.target.x, e.x);
