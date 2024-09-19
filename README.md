@@ -25,3 +25,14 @@ Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To u
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+
+
+## Development Objectives
+
+create an angular v17 app which includes a d3 bubble chart.
+add a brush with the ability to replot just the brush selection.
+add x and y axes and labels.
+add drag and drop.
+add zoom capability.
+add tooltip showing data values on hover.
+make component view responsive to viewport size.
