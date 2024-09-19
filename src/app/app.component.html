@@ -1,21 +1,13 @@
-<h3>D3 sandbox</h3>
-
-<nav>
-  <ul>
-    <li>
-      <a routerLink="/baseball">Baseball</a>
-    </li>
-    <li>
-      <a routerLink="/bubblechart">Bubble Chart</a>
-    </li>
-    <li>
-      <a routerLink="/nodes">Node Graph</a>
-    </li>    
-    <!-- <li>
-      <a routerLink="/bubblechart2">Bubble Chart2</a>
-    </li> -->
-  </ul>
-</nav>
+<div style="display: flex">
+  <div class="nav-header">
+    <h1>D3 sandbox</h1>
+  </div>
+  <div class="nav-details">
+    <a class="nav-detail" routerLink="/baseball">Baseball</a>
+    <a class="nav-detail" routerLink="/bubblechart">Bubble Chart</a>
+    <a class="nav-detail" routerLink="/nodes">Node Graph</a> 
+  </div>
+</div>
 
 <router-outlet></router-outlet>
 
