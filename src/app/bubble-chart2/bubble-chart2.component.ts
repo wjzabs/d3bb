@@ -89,6 +89,26 @@ export class BubbleChart2Component implements OnInit {
 
     d3.select(this.svgElement.nativeElement).call(this.zoom);
 
+    // copied from jeffery's scatter-graph.component
+    // const move = (selection: any, event: any, d: any) => {
+
+    //   const x = this.clamped(this.scaleX(d.x) + event.dx, 0, this.width)
+    //   const y = this.clamped(this.scaleY(d.y) + event.dy, 0, this.height)
+
+    //   d.x = this.scaleX.invert(x);
+    //   d.y = this.scaleY.invert(y);
+
+    //   selection
+    //     .attr("cx", x)
+    //     .attr("cy", y);
+
+    //   d3.select('#tooltip')
+    //     .style("left", x + 'px')
+    //     .style("top", (y + 30) + 'px')
+
+    //   this.changeEvent.emit();
+    // };
+
     // Add brush functionality
     const brush = d3
       .brush()
@@ -113,6 +133,7 @@ export class BubbleChart2Component implements OnInit {
         // WJZ note - this was the only error that I needed to rem out until i address it
         // d3.select('.brush').call(brush.move, null); // Remove brush after selection
       });
+
 
     this.svg.append('g').attr('class', 'brush').call(brush);
 

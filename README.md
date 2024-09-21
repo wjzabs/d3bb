@@ -52,3 +52,28 @@ https://github.com/topojson/us-atlas/tree/master/img
 
 US Census
 https://www.census.gov/
+
+
+FIPS Master List
+https://public.opendatasoft.com/explore/dataset/us-county-boundaries/export/?disjunctive.statefp&disjunctive.countyfp&disjunctive.name&disjunctive.namelsad&disjunctive.stusab&disjunctive.state_name
+
+Plotly dataasets
+https://github.com/plotly/datasets/commit/95672208c26b44a6e32363b17a35b8caa1b5d2ef#diff-e98d80e92d3253e3da6ee2efc6a0000b2b944ea450a2806e251d2ab470a3cdaa
+
+reddit advice on zip to fips
+https://www.reddit.com/r/Census/comments/llcsvk/census_block_fips_code_to_zip_code/
+
+zip to fips
+https://www.censushardtocountmaps2020.us/?latlng=39.68183%2C-79.43115&z=6&query=coordinates%3A%3A40.61395%2C-72.99316&promotedfeaturetype=states&baselayerstate=4&rtrYear=sR2020latest&infotab=info-rtrselfresponse&filterQuery=false
+
+xref zip to fips
+https://www.kaggle.com/datasets/danofer/zipcodes-county-fips-crosswalk
+
+HUD USPS ZIP Code Crosswalk Files
+https://www.huduser.gov/portal/datasets/usps_crosswalk.html
+
+12 cross walk files
+https://www.huduser.gov/apps/public/uspscrosswalk/home
+
+
+
