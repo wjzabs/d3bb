@@ -36,3 +36,19 @@ add drag and drop.
 add zoom capability.
 add tooltip showing data values on hover.
 make component view responsive to viewport size.
+
+From Jeffery
+GeoJSON and KML data for the United States
+https://eric.clst.org/tech/usgeojson/
+
+Choropleth 1
+https://observablehq.com/@d3/choropleth
+
+Choropleth 2
+https://observablehq.com/@d3/choropleth/2?intent=fork
+
+US-Atlas MB
+https://github.com/topojson/us-atlas/tree/master/img
+
+US Census
+https://www.census.gov/

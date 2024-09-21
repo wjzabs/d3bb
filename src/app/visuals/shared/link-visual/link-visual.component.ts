@@ -45,7 +45,7 @@ export class LinkVisualComponent implements OnInit, OnChanges {
       this.targetX = this.link.target.x;
     }
     if(this.link?.target instanceof Node && this.link.target.y) {
-      this.targetX = this.link.target.y;
+      this.targetY = this.link.target.y;
     }
   }
 }
