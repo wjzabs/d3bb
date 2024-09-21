@@ -34,7 +34,8 @@ export class ChoroplethComponent implements OnInit {
       .scale(1000);
       // .scale([1000]);
     const path = d3.geoPath().projection(projection);
-
+    
+    // d3.json('assets/counties-albers-10m').then((data: any) => {
     d3.json('assets/counties.json').then((data: any) => {
       this.svg.selectAll('path')
         .data(data.features)
