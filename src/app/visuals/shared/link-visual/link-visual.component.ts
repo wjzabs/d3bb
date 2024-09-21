@@ -1,20 +1,24 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { Link, Node } from '../../../d3';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
+
+// template: `
+// <svg:line
+//     class="link"
+//     [attr.x1]="sourceX"
+//     [attr.y1]="sourceY"
+//     [attr.x2]="targetX"
+//     [attr.y2]="targetY"
+// ></svg:line>
+// `,
 
 @Component({
   selector: '[linkVisual]',
   standalone: true,
-  imports: [],
-  template: `
-    <svg:line
-        class="link"
-        [attr.x1]="sourceX"
-        [attr.y1]="sourceY"
-        [attr.x2]="targetX"
-        [attr.y2]="targetY"
-    ></svg:line>
-  `,
+  imports: [FormsModule, CommonModule],
+  templateUrl: 'link-visual.component.html',
   styleUrls: ['./link-visual.component.css']
 })
 export class LinkVisualComponent implements OnInit, OnChanges {
@@ -48,4 +52,7 @@ export class LinkVisualComponent implements OnInit, OnChanges {
       this.targetY = this.link.target.y;
     }
   }
+
+  castToNode(value: any): value is Node { return true; }
+
 }

@@ -1,0 +1,9 @@
+<svg:line
+    class="link" *ngIf="link && link.source instanceof Node && link.target instanceof Node"
+    [attr.x1]="castToNode(link.source) ? link.source.x : 0"
+    [attr.y1]="castToNode(link.source) ? link.source.y : 0"
+    [attr.x2]="castToNode(link.target) ? link.target.x : 0"
+    [attr.y2]="castToNode(link.target) ? link.target.y : 0"
+></svg:line>
+
+<!-- class="link" *ngIf="link && link.source && link.target" -->
