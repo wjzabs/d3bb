@@ -96,19 +96,98 @@ export class ChoroplethComponent implements OnInit {
 
     console.log({minData, maxData})
 
-    let colorCodes = ["#5E4FA2", "#3288BD", "#66C2A5", "#ABDDA4", "#E6F598", "#FFFFBF", "#FEE08B", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142"];
-
+    // let colorCodes = ["#5E4FA2", "#3288BD", "#66C2A5", "#ABDDA4", "#E6F598", "#FFFFBF", "#FEE08B", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142"];
+    let colorCodes = ['#f7fcfd','#e5f5f9','#ccece6','#99d8c9','#66c2a4','#41ae76','#238b45','#006d2c','#00441b']
     // let colors = d3.scaleQuantile()
     // .domain([minData,maxData])
     // .range(colorCodes);
     
-    let color = d3.scaleLinear<string, number>()
+    // let color = d3.scaleLinear<string, number>()
+    //   .domain([minData, maxData])
+    //   // .range(["red", "blue"]);
+    //   .range(colorCodes);
+
+    // https://r-graph-gallery.com/38-rcolorbrewers-palettes
+    // https://d3-graph-gallery.com/graph/custom_color.html
+    // Option 2: Color brewer.
+    // Include <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script> in your code!
+    // https://d3js.org/d3-scale-chromatic/sequential
+    let color = d3.scaleSequential()
       .domain([minData, maxData])
-      .range(["red", "blue"]);
+      .interpolator(d3.interpolateBlues);
+      // .interpolator(d3.interpolatePuRd);
+
+    // let color2 =  d3.scaleThreshold()
+    //   .domain(d3.range(minData, maxData))
+    //   .range(d3.schemeBlues[9])
 
     // color: {scheme: "Blues", type: "quantize", n: 9, domain: [1, 10], label: "Unemployment rate (%)", legend: true},
+    // let color = {scheme: "Blues", type: "quantize", n: 9, domain: [minData, maxData], label: "Retail Sales", legend: true}
 
     // .attr('fill', '#abc')
+
+    // let format = d3.format(',');
+    const round = (num:number, digits: number) => {
+      const multiplier = Math.pow(10, digits) * 2;
+      const value = Math.round(num * multiplier) / multiplier;
+      // return value.toFixed(digits + 1);
+      return value.toFixed(digits);
+      // return format(value.toFixed(digits))
+      // var x = d3.format("$,.2f")(myVal);  
+      // var x = d3.format(",.0f")(d.data); 
+    }
+
+
+    // Legend
+    
+    let x = d3.scaleLinear()
+    .domain([1, 10])
+    .rangeRound([600, 860]);
+
+    let colorLegend = d3.scaleThreshold()
+    .domain(d3.range(2, 10))
+    .range(d3.schemeBlues[9] as Iterable<number>); // this needs to be de-remmed
+
+    let g = this.svg.append("g")
+    .attr("class", "key")
+    .attr("transform", "translate(0,40)");
+
+    g.selectAll("rect")
+    .data(colorLegend.range().map(function(d:any) {
+      d = colorLegend.invertExtent(d);
+      if (d[0] == null) d[0] = x.domain()[0];
+      if (d[1] == null) d[1] = x.domain()[1];
+      return d;
+    }))
+    .enter().append("rect")
+    .attr("height", 8)
+    .attr("x", function(d:any) { return x(d[0]); })
+    .attr("width", function(d:any) { return x(d[1]) - x(d[0]); })
+    .attr("fill", function(d:any) { return color(d[0]); });
+
+    g.append("text")
+    .attr("class", "caption")
+    .attr("x", x.range()[0])
+    .attr("y", -6)
+    .attr("fill", "#000")
+    .attr("text-anchor", "start")
+    .attr("font-weight", "bold")
+    .text("Unemployment rate");
+
+    // .tickFormat(function(x, i) { return i ? x : x + "%"; })
+    g.call(
+    d3
+    .axisBottom(x)
+    .tickSize(13)
+    .tickFormat(function(x:any, i:any) { return i ? x : x + "%"; })
+    .tickValues(color.domain()))
+    .select(".domain")
+    .remove();
+
+
+
+
+
 
     // d3.json('assets/counties.json').then((data: any) => {
     // d3.json('assets/cb_2017_us_county_20m.json').then((data: any) => {
@@ -125,7 +204,7 @@ export class ChoroplethComponent implements OnInit {
           this.tooltip.transition().duration(200).style('opacity', 0.9);
           // this.tooltip.html(`County: ${d.properties.NAME}<br>Value: ${d.properties.density}`)
           // this.tooltip.html(`County: ${d.properties.NAME}<br>STATEFP: ${d.properties.STATEFP}`)
-          this.tooltip.html(`County: ${d.properties.NAME}<br>State: ${d.state.name}<br>Sales: ${d.data}`)
+          this.tooltip.html(`County: ${d.properties.STATEFP}${d.properties.COUNTYFP} - ${d.properties.NAME}<br>State: ${d.properties.STATEFP} ${d.state.name}<br>ALAND: ${round(d.properties.ALAND,0)}<br>Sales: ${d3.format("$,.0f")(d.data)}`)
             .style('left', (event.pageX + 5) + 'px')
             .style('top', (event.pageY - 28) + 'px');
         })
@@ -133,6 +212,12 @@ export class ChoroplethComponent implements OnInit {
           this.tooltip.transition().duration(500).style('opacity', 0);
         });
     // });
+
+// https://d3js.org/d3-geo/conic
+// https://d3js.org/d3-geo/conic#geoAlbersUsa
+
+    // https://www.youtube.com/watch?v=FsDyelH58F0
+// states https://d3js.org/us-10m.v1.json
 
     console.log(this.svg)
   }

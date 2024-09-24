@@ -1,0 +1,6 @@
+<button (click)="playClick()">{{caption}}</button>
+<div class="slidecontainer">
+    <input #slider type="range" class="slider" id="slider" [(ngModel)]="sliderValue">
+    <label>{{slider.value}}: </label>
+    <label>{{week}}</label>
+</div>
