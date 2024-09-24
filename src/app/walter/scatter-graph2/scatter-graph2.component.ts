@@ -74,7 +74,7 @@ export class ScatterGraph2Component implements OnInit, OnChanges, OnDestroy, Aft
   dates: any[] = [];
   
 intervalId!: any;
-sliderValue: number =   1; // 17;
+sliderValue: number = 0; //  1; // 17;
 week: string = '';
 
 private m = new Map()
@@ -105,7 +105,7 @@ private m = new Map()
       //   SELECT COLLECTION_CODE, COLLECTION_NAME, BRAND_CODE FROM ICTCOLL1
       //   ) ORDER BY BRAND_CODE, COLLECTION_CODE      
     })
-    console.log(this.collections)
+    // console.log(this.collections)
 
     await d3.json('assets/retail_sales.json').then((data: any) => {
       this.retail_sales = data;
@@ -120,18 +120,19 @@ private m = new Map()
       //   GROUP BY ICTCOLL1.BRAND_CODE, ICTITEM1.COLLECTION_CODE, RSTRETL1.OPS_YYYYWW
       //   ) ORDER BY BRAND_CODE, COLLECTION_CODE, OPS_YYYYWW      
     })
-    console.log(this.retail_sales)
+    // console.log(this.retail_sales)
     this.retail_sales.forEach(x => {
       x.AMT_SOLD = x.AMT_SOLD || 0
       x.QTY_SOLD = x.QTY_SOLD || 0
       x.STORES = x.STORES || 0
     })
 
-    this.loadData(this.sliderValue)
+    this.initializeWeek()
+    // this.loadData()
 
     // console.log(this.dates)
-    this.slider.nativeElement.min = 1
-    this.slider.nativeElement.max = this.dates.length
+    this.slider.nativeElement.min = 0
+    this.slider.nativeElement.max = this.dates.length -1
 console.log(this.slider.nativeElement.min, this.slider.nativeElement.max)
 
     this.setMinMax()
@@ -153,11 +154,10 @@ console.log(this.slider.nativeElement.min, this.slider.nativeElement.max)
     this.yMax = d3.max(this.retail_sales, function(d) {return d.QTY_SOLD ? d.AMT_SOLD/d.QTY_SOLD : 0}) as number;
     this.yMin = d3.min(this.retail_sales, function(d) {return d.QTY_SOLD ? d.AMT_SOLD/d.QTY_SOLD : 0}) as number;
 
-    // this.maxRadius = d3.max(this.retail_sales, (d:ScatterDatum) => {return d.AMT_SOLD}) as number;
-    // this.minRadius = d3.min(this.retail_sales, (d:ScatterDatum) => {return d.AMT_SOLD}) as number;
     this.rMax = d3.max(this.retail_sales, (d:ScatterDatum) => {return d.AMT_SOLD}) as number;
     this.rMin = d3.min(this.retail_sales, (d:ScatterDatum) => {return d.AMT_SOLD}) as number;
     this.rMax = 250000
+
 console.log(this.rMin, this.rMax)
   }
 
@@ -183,7 +183,8 @@ console.log(this.rMin, this.rMax)
     }
   }
 
-  loadData(i: number) {
+  loadData() {
+    let i = this.sliderValue
     let date = this.dates[i]
     let YYYYWW: string = date.YYYYWW
     let dataYW = this.retail_sales.filter(x => {return x.OPS_YYYYWW === YYYYWW})
@@ -192,51 +193,45 @@ console.log(this.rMin, this.rMax)
     dataYW.forEach((d:any) => { this.m.set(d.COLLECTION_CODE, d)})
     console.log({i, dataYW, m:this.m})
 
-    this.data = []
-    this.collections.forEach(x => {
+    if (this.data.length === 0) {this.initializeData()}
+  
+    this.data.forEach((x:ScatterDatum) => {
       let sales_data = this.m.get(x.COLLECTION_CODE)
       if (!sales_data) {
-        sales_data = {
-          BRAND_CODE: x.BRAND_CODE,
-          COLLECTION_CODE: x.COLLECTION_CODE,
-          COLLECTION_NAME: x.COLLECTION_NAME,
-          QTY_SOLD: 0,
-          AMT_SOLD: 0,
-          PRICE: 0,
-          STORES: 0
-        }
+        x.QTY_SOLD = 0
+        x.AMT_SOLD = 0
+        x.PRICE = 0
+        x.STORES = 0
       } else {
-        sales_data.QTY_SOLD = sales_data.QTY_SOLD || 0
-        sales_data.AMT_SOLD = sales_data.AMT_SOLD || 0
-        sales_data.STORES = sales_data.STORES || 0
+        x.QTY_SOLD = sales_data.QTY_SOLD || 0
+        x.AMT_SOLD = sales_data.AMT_SOLD || 0
+        x.STORES = sales_data.STORES || 0
+        x.PRICE = sales_data.QTY_SOLD ? sales_data.AMT_SOLD / sales_data.QTY_SOLD : 0
       }
-      // console.log({x, sales_data})
-      sales_data.PRICE = sales_data.QTY_SOLD ? sales_data.AMT_SOLD / sales_data.QTY_SOLD : 0
+      x.x = x.STORES
+      x.y = x.PRICE
+      x.r = x.AMT_SOLD
 
+    })
+  }
+
+  initializeData() {
+    // this.data = []
+    this.collections.forEach(x => {      
       let dp: ScatterDatum = {
-        AMT_SOLD: sales_data.AMT_SOLD,
-        x: sales_data.STORES, 
-        y: sales_data.PRICE, 
-        r: sales_data.AMT_SOLD,
-        BRAND_CODE: sales_data.BRAND_CODE,
-        COLLECTION_CODE: sales_data.COLLECTION_CODE,
-        COLLECTION_NAME: sales_data.COLLECTION_NAME,
-        QTY_SOLD: sales_data.QTY_SOLD,
-        PRICE: sales_data.PRICE,
-        STORES: sales_data.STORES
-      }    
+        AMT_SOLD: 0,
+        x: 0, 
+        y: 0, 
+        r: 0,
+        BRAND_CODE: x.BRAND_CODE,
+        COLLECTION_CODE: x.COLLECTION_CODE,
+        COLLECTION_NAME: x.COLLECTION_NAME,
+        QTY_SOLD: 0,
+        PRICE: 0,
+        STORES: 0
+      } 
       this.data.push(dp)
     })
-    
-    console.log({data: this.data, m: this.m})
-    // this.xMax = d3.max(this.data, (d:ScatterDatum) => {return d.x}) as number;
-    // this.xMin = d3.min(this.data, function(d) {return d.x}) as number;
-
-    // this.yMax = d3.max(this.data, function(d) {return d.y}) as number;
-    // this.yMin = d3.min(this.data, function(d) {return d.y}) as number;
-
-    // this.rMax = d3.max(this.data, (d:ScatterDatum) => {return d.r}) as number;
-    // this.rMin = d3.min(this.data, (d:ScatterDatum) => {return d.r}) as number;
   }
 
   // getData() {
@@ -259,60 +254,32 @@ startInterval() {
       console.log('stopping interval')
       this.stopInterval();
     } else {
-      // console.log('->', this.slider.nativeElement.value)
+
       this.sliderValue +=1
-      let weekData = this.dates[this.sliderValue -1]
 
-      this.week = weekData.YYYYWW + ' Week Ending:' + weekData.WEEK_END_DATE
-      // console.log(this.week)
+      this.initializeWeek()
 
-      // this.getData()
-      this.loadData(this.sliderValue)
-      this.slider.nativeElement.value = this.sliderValue
-      // console.log('+1', this.slider.nativeElement.value)
+      // this.slider.nativeElement.value = this.sliderValue
 
       let thisdata = this.data
       d3.selectAll('.data').each(function(d:any, i:number) {
         // Within this function d is this group's data.
         // Iterate, accumulate, do whatever you like at this point.
         // console.log({d})
-        if (i===255) { console.log(d) }
+
+        if (i===255) { console.log('before', d) }
         d = {...thisdata[i]}
+        if (i===255) { console.log('after', d) }
       });
 
-      // let oldd: any[] = []
-      // d3.selectAll('.data').each(function(d:any) {
-      //   // Within this function d is this group's data.
-      //   // Iterate, accumulate, do whatever you like at this point.
-      //   // console.log({d})
-      //   oldd = d;
-      // });
-
-      // oldd.forEach((d: any) => {
-      //   let COLLECTION_CODE = d.COLLECTION_CODE || ''
-      //   let sales_data = this.m.get(COLLECTION_CODE)
-      //   d.x = sales_data.STORES
-      //   d.x = sales_data.STORES
-      //   d.r = sales_data.QTY_SOLD ? sales_data.AMT_SOLD / sales_data.QTY_SOLD : 0
-      // })
+// console.log(this.data[255])
 
       d3.selectAll(".data")
       .transition()
       .duration(500)
-      .attr("cy", (d: any) => this.scaleY(d.y))
+      .attr("cx", (d: any) => this.scaleX(d.x) || 0)
       .attr("cy", (d: any) => this.scaleY(d.y))
       .attr("r", (d: any) => this.scaleR(d.r))
-      // 
-      // .attr("cy", (d: any) => this.scaleY(d.y))
-      // .attr("r", (d: any) => this.scaleR(d.r))
-
-      // d3.selectAll(".data")
-      // .transition()
-      // .duration(1000)
-      // .attr("cx", 1000)
-      // .attr("cy", 250)
-      // .attr("r", 20)
-
     }
   }, 500)
 }
@@ -321,6 +288,13 @@ stopInterval() {
   this.caption = "Play"
   clearInterval(this.intervalId);
   console.log('interval stopped')
+}
+
+initializeWeek() {
+  let weekData = this.dates[this.sliderValue]
+  this.week = weekData.YYYYWW + ' Week Ending:' + weekData.WEEK_END_DATE
+
+  this.loadData()
 }
 
   private createSvg(nativeElement: any) {
@@ -422,7 +396,7 @@ stopInterval() {
        .append('circle')
           // .attr("cx", function (d: any) { return scaleX(d.x)})
 
-          .attr("cx", (d: any) => scaleX(d.x))
+          .attr("cx", (d: any) => scaleX(d.x) || 0)
           .attr("cy", (d: any) => scaleY(d.y))
           .attr("r", (d: any) => scaleR(d.r))
 
