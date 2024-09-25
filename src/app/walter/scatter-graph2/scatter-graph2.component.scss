@@ -17,3 +17,22 @@ div.tooltip {
 div.tooltip p {
   margin: 0;
 }
+.slidecontainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.choose-data, .choose-entity {
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.play-button {
+  height: 20px;
+}

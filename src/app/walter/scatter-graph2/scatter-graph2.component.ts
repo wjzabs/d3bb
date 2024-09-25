@@ -261,16 +261,16 @@ startInterval() {
 
       // this.slider.nativeElement.value = this.sliderValue
 
-      let thisdata = this.data
-      d3.selectAll('.data').each(function(d:any, i:number) {
-        // Within this function d is this group's data.
-        // Iterate, accumulate, do whatever you like at this point.
-        // console.log({d})
+      // let thisdata = this.data
+      // d3.selectAll('.data').each(function(d:any, i:number) {
+      //   // Within this function d is this group's data.
+      //   // Iterate, accumulate, do whatever you like at this point.
+      //   // console.log({d})
 
-        if (i===255) { console.log('before', d) }
-        d = {...thisdata[i]}
-        if (i===255) { console.log('after', d) }
-      });
+      //   if (i===255) { console.log('before', d) }
+      //   d = {...thisdata[i]}
+      //   if (i===255) { console.log('after', d) }
+      // });
 
 // console.log(this.data[255])
 
@@ -292,9 +292,15 @@ stopInterval() {
 
 initializeWeek() {
   let weekData = this.dates[this.sliderValue]
-  this.week = weekData.YYYYWW + ' Week Ending:' + weekData.WEEK_END_DATE
+  // this.week = weekData.YYYYWW + ' Week Ending:' + weekData.WEEK_END_DATE
+  this.week = weekData.YYYYWW + ' Week Ending ' + this.format(weekData.WEEK_END_DATE)
 
   this.loadData()
+}
+
+format(d: string) {
+  let dx = d.substr(0,10)
+  return dx.substr(5,2) + '/' + dx.substr(8,2) + '/' + dx.substr(0,4)
 }
 
   private createSvg(nativeElement: any) {

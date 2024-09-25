@@ -1,6 +1,40 @@
-<button (click)="playClick()">{{caption}}</button>
-<div class="slidecontainer">
-    <input #slider type="range" class="slider" id="slider" [(ngModel)]="sliderValue">
-    <label>{{slider.value}}: </label>
-    <label>{{week}}</label>
+<div class="container">
+
+    <button class="play-button" (click)="playClick()">{{caption}}</button>
+    <div class="slidecontainer">
+        <div>
+            <input #slider type="range" class="slider" id="slider" [(ngModel)]="sliderValue">
+            <label>{{+slider.value +1}} </label>
+        </div>
+        <label>{{week}}</label>
+        <label *ngIf="dates.length>0">{{dates.length}} Weeks from {{dates[0].YYYYWW}} to {{dates[dates.length-1].YYYYWW}}</label>
+    </div>
+
+    <span class="choose-data">
+        <label for="data">Choose Data:</label>
+        <select name="data" id="data">
+            <option value="$Sell-Thru">$Sell-Thru</option>
+            <option value="#On Hand">$On Hand</option>
+            <option value="$Promo">$Promo</option>
+            <option value="$Model">$Modeling</option>
+            <option value="$SThru/Spend">$SThru/Spend</option>
+            <option value="$Sell-In">$Sell-In</option>
+            <option value="$Inventory">$Inventory</option>
+        </select>
+    </span>
+
+    <span class="choose-entity">
+        <label for="entity">Choose Entity:</label>
+        <select name="entity" id="entity">
+            <option value="Brands/Collections">Brands/Collections</option>
+            <option value="Customers/Regions">Customers/Regions</option>
+        </select>
+    </span>
+
+    <span>
+        <label for="brands">Choose Brands:</label>
+        <select name="brands" id="brands" multiple>
+        <option *ngFor="let brand of brands" value="{{brand.BRAND_CODE}}">{{brand.BRAND_CODE}}</option>
+        </select>
+    </span>
 </div>
