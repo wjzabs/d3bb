@@ -61,7 +61,7 @@ export class ScatterGraph2Component implements OnInit, OnChanges, OnDestroy, Aft
   private svgWidth = 0;
   private svgHeight = 0;
   private width = 900;
-  private height = 500;
+  private height = 400;
   private top = 5;
   private bottom = 20;
   private left = 30;
@@ -293,14 +293,18 @@ stopInterval() {
 initializeWeek() {
   let weekData = this.dates[this.sliderValue]
   // this.week = weekData.YYYYWW + ' Week Ending:' + weekData.WEEK_END_DATE
-  this.week = weekData.YYYYWW + ' Week Ending ' + this.format(weekData.WEEK_END_DATE)
+  this.week = 'Week ' + this.format642(weekData.YYYYWW) + ' Ending ' + this.formatDate(weekData.WEEK_END_DATE)
 
   this.loadData()
 }
 
-format(d: string) {
+formatDate(d: string) {
   let dx = d.substr(0,10)
   return dx.substr(5,2) + '/' + dx.substr(8,2) + '/' + dx.substr(0,4)
+}
+
+format642(d: string) {
+  return d.substr(0,4) + '-' + d.substr(4,2)
 }
 
   private createSvg(nativeElement: any) {

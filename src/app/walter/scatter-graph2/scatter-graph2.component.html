@@ -7,11 +7,11 @@
             <label>{{+slider.value +1}} </label>
         </div>
         <label>{{week}}</label>
-        <label *ngIf="dates.length>0">{{dates.length}} Weeks from {{dates[0].YYYYWW}} to {{dates[dates.length-1].YYYYWW}}</label>
+        <label *ngIf="dates.length>0">{{dates.length}} Weeks from {{format642(dates[0].YYYYWW)}} to {{format642(dates[dates.length-1].YYYYWW)}}</label>
     </div>
 
     <span class="choose-data">
-        <label for="data">Choose Data:</label>
+        <label for="data">Data:</label>
         <select name="data" id="data">
             <option value="$Sell-Thru">$Sell-Thru</option>
             <option value="#On Hand">$On Hand</option>
@@ -24,7 +24,7 @@
     </span>
 
     <span class="choose-entity">
-        <label for="entity">Choose Entity:</label>
+        <label for="entity">Entity:</label>
         <select name="entity" id="entity">
             <option value="Brands/Collections">Brands/Collections</option>
             <option value="Customers/Regions">Customers/Regions</option>
@@ -32,7 +32,7 @@
     </span>
 
     <span>
-        <label for="brands">Choose Brands:</label>
+        <label for="brands">Brands:</label>
         <select name="brands" id="brands" multiple>
         <option *ngFor="let brand of brands" value="{{brand.BRAND_CODE}}">{{brand.BRAND_CODE}}</option>
         </select>
