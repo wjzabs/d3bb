@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { RouterLink, RouterOutlet, RouterLinkActive } from '@angular/router';
 import { BaseballComponent } from './baseball/baseball.component';
 import { BubbleChartComponent } from './bubble-chart/bubble-chart.component';
 import { NodeGraphComponent } from './visuals/node-graph/node-graph.component';
@@ -12,7 +12,7 @@ import { SHARED_VISUALS } from './visuals/shared';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [FormsModule, RouterLink, RouterOutlet, BaseballComponent, BubbleChartComponent, NodeGraphComponent, GraphComponent],
+  imports: [FormsModule, RouterLink, RouterOutlet, RouterLinkActive, BaseballComponent, BubbleChartComponent, NodeGraphComponent, GraphComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   providers: [D3Service]

@@ -1,0 +1,48 @@
+svg {
+    width: 100%;
+    height: 100%;
+}
+
+#output { 
+    width: 650px; height: 100%; overflow-y: scroll;
+  }
+  
+  #csvout {
+    width: 280px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+  }
+  
+  ::ng-deep {
+  .row {
+    font-family: Courier;
+    font-size: 12px;
+    float: left;
+    clear: left;
+    margin: 5px;
+  }
+  .original {
+    float: left;
+    border: 1px solid black;
+    padding: 3px 5px;;
+  }
+  .geo {
+    float:left;
+    margin: 4px;
+    padding: 2px 4px;
+    border: 1px solid #efefef;
+    cursor: pointer;
+  }
+  .geo:hover {
+    background-color: #f3e4cd;
+  }
+}
+
+  button {
+    position: absolute;
+    color: blue;
+    top: 5px;
+    right: 285px;
+  }

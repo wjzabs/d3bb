@@ -1,0 +1,35 @@
+<main class="wrapper">
+  <div>
+    <label for="YPs">Choose a Month:</label>
+
+    <select name="YPs" id="YPs" [(ngModel)]="YP_selected" (change)="YP_changed()">
+      <option value="202401">202401</option>
+      <option value="202402">202402</option>
+      <option value="202403">202403</option>
+      <option value="202404">202404</option>
+      <option value="202405">202405</option>
+      <option value="202406">202406</option>
+      <option value="202407">202407</option>
+      <option value="202408">202408</option>
+      <option value="202409">202409</option>
+    </select>
+
+    <button class="play-button" (click)="playClick()">Play</button>
+
+  </div>
+  <div class="content">
+    <h1>US Sales</h1>
+    <p>
+      This US Map shows (All) Lab Sales in {{YP_selected.substring(0,4)}}-{{YP_selected.substring(4,6)}} with a 
+      <a
+        href="https://github.com/d3/d3-scale/blob/master/README.md#scaleThreshold"
+        >threshold scale</a
+      >.
+    </p>
+
+    <svg id="map" #map width="960" height="600"></svg>
+
+  </div>
+</main>
+<div id="tooltip" class="tooltip" style="opacity: 0;"></div>
+        

@@ -16,5 +16,21 @@
 
 }
 .nav-detail:hover {
-    color: red;
+    color: orange;
 }
+
+.nav-detail:active {
+    // color: purple;
+    background-color: orange
+}
+
+.active-link {
+    color: red;
+    // background-color: yellow;
+}
+
+
+// .active {
+//     // color: purple;
+//     background-color: greenyellow;
+// }

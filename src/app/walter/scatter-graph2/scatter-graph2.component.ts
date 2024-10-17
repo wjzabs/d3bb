@@ -308,7 +308,7 @@ format642(d: string) {
 }
 
   private createSvg(nativeElement: any) {
-    this.svgWidth = this.width + this.left + this.right;
+    this.svgWidth = this.width + this.left + this.right + 200;
     this.svgHeight = this.height + this.top + this.bottom;
 
     d3.selectAll('svg').remove()
@@ -343,6 +343,7 @@ format642(d: string) {
 
   private setScales() {
     this.scaleX = d3.scaleLog()
+      .base(5)
       .range([0, this.width])
       .domain([this.xMin, this.xMax]);
       
@@ -373,6 +374,18 @@ format642(d: string) {
   }
 
   private drawScatter() {
+
+    const customColors = [
+      '#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231',
+      '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe',
+      '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000',
+      '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080',
+  ];
+  const brandCodes = this.brands.map(b => b.BRAND_CODE);
+  const colorScale = d3.scaleOrdinal()
+      .domain(brandCodes)
+      .range(customColors);
+
     const move = (selection: any, event: any, d: any) => {
 
       const x = this.clamped(this.scaleX(d.x) + event.dx, 0, this.width)
@@ -415,7 +428,8 @@ format642(d: string) {
           // .attr("r", (d: any) => this.scaleR(d.r))
           .attr("class", "data")
           .attr("id", (d: any) => d.COLLECTION_CODE) // this needs to be changed to the key of the data Map
-          .attr("fill", 'red')
+          // .attr("fill", 'red')
+          .attr("fill", (d: any) => colorScale(d.BRAND_CODE))
           .style("stroke", 'black')
           .on("mouseover", (event: any, d: any) => {
 
@@ -424,11 +438,26 @@ format642(d: string) {
             const posX = rawX;
             const posY = rawY + 30;
 
+            const amtSold = d3.format(",.2f")(d.AMT_SOLD) || d.AMT_SOLD.toFixed(2);
+            const price = d3.format("$,.2f")(d.PRICE) || d.PRICE.toFixed(2);
+
             d3.select('#tooltip')
-              .html(`label`)
+              // .html(`label`)
+              .html(`
+                <div>
+                  <strong>Collection Code:</strong> ${d.COLLECTION_CODE} <br/>
+                  <strong>Collection Name:</strong> ${d.COLLECTION_NAME} <br/>
+                  <strong>Brand Code:</strong> ${d.BRAND_CODE} <br/>
+                  <strong>Qty Sold:</strong> ${d.QTY_SOLD} <br/>
+                  <strong>Amt Sold:</strong> ${amtSold} <br/>
+                  <strong>Price:</strong> ${price} <br/>
+                </div>
+              `)
               // .attr("text", function (d:ScatterDatum) { return d.COLLECTION_CODE || 'NO COLL'})
-              .style("left", rawX + 'px')
-              .style("top", rawY + 'px')
+              // .style("left", rawX + 'px')
+              // .style("top", rawY + 'px')
+              .style("left", (event.pageX + "px"))
+              .style("top", ((event.pageY) + "px"))  
               .style('opacity', 1)
           })
           .on("mousemove", (event: any, d: any) => {
@@ -450,9 +479,39 @@ format642(d: string) {
             })
             .on("end", d => {
               console.log('end', {d});
+
+              
             })
-          )
+          );
+          
+          this.drawLegend(colorScale);
+
+
+          
   }
+
+  private drawLegend(colorScale: any) {
+    const legend = this.mainGroup.selectAll('.legend') //creating the legend itself
+        .data(colorScale.domain())
+        .enter()
+        .append('g')
+        .attr('class', 'legend')
+        .attr('transform', (d: string, i: number) => `translate(0, ${i * 20})`);
+ 
+    legend.append('rect') //making the colored squares for the legend
+        .attr('x', this.width + 100)
+        .attr('width', 18)
+        .attr('height', 18)
+        .style('fill', colorScale);
+ 
+    legend.append('text') //making the keys for the legend
+        .attr('x', this.width + 95) //5 px to the left of the box
+        .attr('y', 9)
+        .attr('dy', '.35em')
+        .style('text-anchor', 'end')
+        .text((d: any) => d);
+  }
+
 
   private clamped(value: number, min: number, max: number): number {
     if(value < min) {

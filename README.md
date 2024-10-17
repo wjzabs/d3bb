@@ -122,6 +122,14 @@ update zip2fips set zipcode = '00' || zipcode where length(zipcode) = 3;
 update zip2fips set zipcode = '0' || zipcode where length(zipcode) = 4;
 ALTER TABLE ZIP2FIPS ADD PRIMARY KEY (ZIPCODE);
 
+ALTER TABLE ZIP2FIPS ADD PRIMARY KEY (ZIPCODE);
+select length(fips), count (*) from zip2fips group by length(fips);
+update zip2fips set fips = '000' || fips where length(fips) = 2;
+update zip2fips set fips = '0' || fips where length(fips) = 4;
+select length(zipcode), count (*) from zip2fips group by length(zipcode)
+update zip2fips set zipcode = '00' || zipcode where length(zipcode) = 3;
+update zip2fips set zipcode = '0' || zipcode where length(zipcode) = 4;
+
 
 SELECT LPAD(ZIP2FIPS.FIPS,5,'0') FIPS, X.* FROM ZIP2FIPS, (
 SELECT SUBSTR(ARTCUST2.CUST_STORE_ZIP_CODE,1,5) CUST_STORE_ZIP_CODE
