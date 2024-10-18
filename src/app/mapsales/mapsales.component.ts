@@ -14,6 +14,7 @@ export class MapsalesComponent implements OnInit, OnChanges {
   private svg: any;
   private tooltip: any;
   public YP_selected: string = '202409'
+  public zip2FIPS_All: any[] = [];
 
   ngOnInit(): void {
     this.createSvg();
@@ -52,7 +53,7 @@ export class MapsalesComponent implements OnInit, OnChanges {
     let features: any[] = [];
     let FIPS: any = {};
     let zip2FIPS: any[] = [];
-    let zip2FIPS_All: any[] = [];
+    // let zip2FIPS_All: any[] = [];
     let ZIPs: any = {}
     let us: any;
 
@@ -70,8 +71,8 @@ export class MapsalesComponent implements OnInit, OnChanges {
       FIPS = data;
     })
     await d3.json('assets/dataLabSales.json').then((data: any) => {
-      zip2FIPS_All = data;
-      zip2FIPS = zip2FIPS_All.filter(x => x.OPS_YYYYPP === this.YP_selected)
+      this.zip2FIPS_All = data;
+      zip2FIPS = this.zip2FIPS_All.filter(x => x.OPS_YYYYPP === this.YP_selected)
     })
 
     features = features.map((feature: any) => {
@@ -248,7 +249,7 @@ console.log('schemeSet3', d3.schemeSet3)
 
   public intervalId: any;
 
-  startInterval() {
+  async startInterval() {
     let YPi = -1
     let YPs = ["202401","202402","202403","202404","202405","202406","202407","202408","202409"]
     // this.caption = "Pause"
@@ -265,16 +266,21 @@ console.log('schemeSet3', d3.schemeSet3)
   
         YPi +=1
         this.YP_selected = YPs[YPi]
-        this.drawMap()
-   
-  // console.log(this.data[255])
-  
+        // this.drawMap()
+
+
+        let zip2FIPS = this.zip2FIPS_All.filter(x => x.OPS_YYYYPP === this.YP_selected)
+
         // d3.selectAll(".data")
         // .transition()
         // .duration(500)
         // .attr("cx", (d: any) => this.scaleX(d.x) || 0)
         // .attr("cy", (d: any) => this.scaleY(d.y))
         // .attr("r", (d: any) => this.scaleR(d.r))
+   
+        // console.log(this.data[255])
+  
+
       }
     }, 1500)
   }
