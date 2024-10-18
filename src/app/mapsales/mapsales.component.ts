@@ -46,9 +46,11 @@ export class MapsalesComponent implements OnInit, OnChanges {
     const height = 600;
 
     const projection = d3.geoAlbersUsa()
+    // const projection = d3.geoPath()
       .translate([width / 2, height / 2])
-      .scale(1000);
+      .scale(1280);
     const path = d3.geoPath().projection(projection);
+    const path2 = d3.geoPath() // .projection(projection);
 
     let features: any[] = [];
     let FIPS: any = {};
@@ -57,11 +59,13 @@ export class MapsalesComponent implements OnInit, OnChanges {
     let ZIPs: any = {}
     let us: any;
 
+    us = await d3.json('assets/us-states.json')
     // await d3.json('assets/us-states.json').then(readyStates.bind(this))
-    await d3.json('assets/us-states.json').then((data: any) => {
-      us = data;
-      console.log({us})
-    })
+    // await d3.json('assets/us-states.json').then((data: any) => {
+    //   us = data;
+    //   console.log({us})
+    // })
+    console.log({usfeatures: us.features})
 
     await d3.json('assets/cb_2017_us_county_20m.json').then((data: any) => {
       features = data.features;
@@ -203,19 +207,19 @@ console.log('schemeSet3', d3.schemeSet3)
         .on('mouseout', () => {
           this.tooltip.transition().duration(500).style('opacity', 0);
         });
-    // });
 
-    // WHY AREN'T THE STATES RENDERING PROPERLY
+        // const path2 = d3.geoPath();
 
-    // this.svg
-    // .append("g")
-    // .attr("class", "states")
-    // .selectAll("path")
-    // .data(us.features)
-    // .enter()
-    // .append("path")
-    // .attr("fill", "none")
-    // .attr("stroke", "black")
+    this.svg
+    .append("g")
+    .attr("class", "states")
+    .selectAll("path")
+    .data(us.features)
+    .enter()
+    .append("path")
+    .attr("fill", "none")
+    .attr("stroke", "black")
+    .attr("d", path2)
     // .attr("d", path as d3.ValueFn<SVGPathElement, unknown, string | number | boolean | readonly (string | number)[] | null>)
 
 
