@@ -54,10 +54,12 @@ export class MapsalesComponent implements OnInit, OnChanges {
     const width = 960;
     const height = 600;
 
-    const projection = d3.geoAlbersUsa()
+    const projection = d3.geoConicEqualArea() // d3.geoAlbersUsa()
     // const projection = d3.geoPath()
-      .translate([width / 2, height / 2])
-      .scale(1280);
+      .center([-73, 41]) // .translate([width / 2, height / 2])
+      .scale(30000); //       .scale(1280);
+      
+    // https://d3js.org/d3-geo/projection
 
     const projection2 = d3.geoPath()
       // .translate([width / 2, height / 2])
@@ -115,6 +117,9 @@ export class MapsalesComponent implements OnInit, OnChanges {
       }
       return {...feature, state, data: AMT_SOLD}
     })
+
+    const NYFeatures = features.filter(x => x.state.abbreviation == 'NY')
+    console.log({NYFeatures, coords: path.centroid(NYFeatures[0])});
 
     console.log({features});
     console.log({FIPS});
@@ -237,7 +242,7 @@ console.log(d3.schemeBlues[9], d3.schemeBlues[9].length)
     .remove()
 
     gCounties.selectAll('path') // this.svg.selectAll('path')
-        .data(features)
+        .data(NYFeatures) // .data(features)
         .enter().append('path')
         .attr('d', path)
         .attr('fill', function (d:any, i:number) {

@@ -36,3 +36,29 @@ div.tooltip p {
 .play-button {
   height: 20px;
 }
+
+
+.legend{
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+
+
+.data {
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+
+.data text {
+  opacity: 0;
+  pointer-events: none;
+  font-size: 12px;
+}
+
+.data:hover text {
+  opacity: 1;
+}
+
+.data:hover circle {
+  fill-opacity: 1;
+}

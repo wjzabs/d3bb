@@ -454,10 +454,10 @@ format642(d: string) {
                 </div>
               `)
               // .attr("text", function (d:ScatterDatum) { return d.COLLECTION_CODE || 'NO COLL'})
-              // .style("left", rawX + 'px')
-              // .style("top", rawY + 'px')
-              .style("left", (event.pageX + "px"))
-              .style("top", ((event.pageY) + "px"))  
+              .style("left", rawX + 'px')
+              .style("top", rawY + 'px')
+              // .style("left", (event.pageX + "px"))
+              // .style("top", ((event.pageY) + "px"))  
               .style('opacity', 1)
           })
           .on("mousemove", (event: any, d: any) => {
@@ -510,6 +510,26 @@ format642(d: string) {
         .attr('dy', '.35em')
         .style('text-anchor', 'end')
         .text((d: any) => d);
+
+        
+    legend
+    .on("mouseover", (event: MouseEvent, type: string) => {
+      d3.selectAll(".legend").style("opacity", 0.1);
+      d3.selectAll(".legend").filter((d:any) => { return d === type; }).style("opacity", 1);
+      d3.selectAll(".data")
+        .style("opacity", 0.1)
+        .filter((d:any) => { 
+          // console.log({d, type})
+          return d["BRAND_CODE"] === type; 
+        })
+        .style("opacity", 1);
+    })
+    .on("mouseout", (event: any, type: string) => {
+      d3.selectAll(".legend").style("opacity", 1);
+      d3.selectAll(".data").style("opacity", 1);
+    });
+
+  
   }
 
 
