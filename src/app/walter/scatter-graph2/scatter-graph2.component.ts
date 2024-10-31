@@ -259,20 +259,7 @@ startInterval() {
 
       this.initializeWeek()
 
-      // this.slider.nativeElement.value = this.sliderValue
 
-      // let thisdata = this.data
-      // d3.selectAll('.data').each(function(d:any, i:number) {
-      //   // Within this function d is this group's data.
-      //   // Iterate, accumulate, do whatever you like at this point.
-      //   // console.log({d})
-
-      //   if (i===255) { console.log('before', d) }
-      //   d = {...thisdata[i]}
-      //   if (i===255) { console.log('after', d) }
-      // });
-
-// console.log(this.data[255])
 
       d3.selectAll(".data")
       .transition()
@@ -375,7 +362,7 @@ format642(d: string) {
 
   private drawScatter() {
 
-    const customColors = [
+    let customColors = [
       '#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231',
       '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe',
       '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000',
@@ -398,7 +385,6 @@ format642(d: string) {
         .attr("cx", x)
         .attr("cy", y);
 
-
       d3.select('#tooltip')
         // .style("left", (d:any) => {x + 'px'})
         .style("left", (x + 'px'))
@@ -417,8 +403,6 @@ format642(d: string) {
       //  .data(this.collections)
        .enter()
        .append('circle')
-          // .attr("cx", function (d: any) { return scaleX(d.x)})
-
           .attr("cx", (d: any) => scaleX(d.x) || 0)
           .attr("cy", (d: any) => scaleY(d.y))
           .attr("r", (d: any) => scaleR(d.r))
@@ -485,9 +469,6 @@ format642(d: string) {
           );
           
           this.drawLegend(colorScale);
-
-
-          
   }
 
   private drawLegend(colorScale: any) {
@@ -529,9 +510,7 @@ format642(d: string) {
       d3.selectAll(".data").style("opacity", 1);
     });
 
-  
   }
-
 
   private clamped(value: number, min: number, max: number): number {
     if(value < min) {

@@ -1,40 +1,62 @@
 <div class="container">
 
-    <button class="play-button" (click)="playClick()">{{caption}}</button>
-    <div class="slidecontainer">
-        <div>
-            <input #slider type="range" class="slider" id="slider" [(ngModel)]="sliderValue">
-            <label>{{+slider.value +1}} </label>
+    <div class="header">
+        <button class="play-button" 
+            igxButton="outline" igxRipple 
+            style="height:50px;"
+            (click)="playClick()">
+            {{caption}}
+        </button>
+
+        <div class="slidecontainer">
+            <div style="width:300px;">
+                <!-- <igx-slider id="slider" 
+                [minValue]="1" 
+                [maxValue]="9" 
+                [step]="1" 
+                [continuous]="true"
+                [(ngModel)]="sliderValue">
+                </igx-slider> -->
+
+                <input #slider type="range" class="slider" id="slider" [(ngModel)]="sliderValue">
+                <label>{{+slider.value +1}} </label>      
+            </div>
+
+            <label *ngIf="dates.length>0">
+                {{dates.length}}  from {{format642(dates[0].OPS_YYYYPP)}} to {{format642(dates[dates.length-1].OPS_YYYYPP)}}
+            </label>    
+    
+        </div>   
+
+        <!-- <div class="combo-section choose-data">
+            <igx-simple-combo #summarySelection 
+            [data]="dataOptions" 
+            [displayKey]="'DATA_CAPTION'" 
+            [valueKey]="'DATA_CODE'" 
+            placeholder="Data ..."
+            [(ngModel)]="DATA_CODE_selected">
+            </igx-simple-combo>
         </div>
-        <label>{{week}}</label>
-        <label *ngIf="dates.length>0">{{dates.length}} Weeks from {{format642(dates[0].YYYYWW)}} to {{format642(dates[dates.length-1].YYYYWW)}}</label>
+
+        <div class="combo-section choose-entity">
+            <igx-simple-combo #entitySelection 
+            [data]="entityOptions" 
+            [displayKey]="'ENTITY_CAPTION'" 
+            [valueKey]="'ENTITY_CODE'" 
+            placeholder="Entity ..."
+            [(ngModel)]="ENTITY_CODE_selected">
+            </igx-simple-combo>
+        </div>
+
+        <div class="combo-section choose-data">
+            <igx-simple-combo #summarySelection 
+            [data]="ENTITY_GROUPs" 
+            [displayKey]="'ENTITY_CODE'" 
+            [valueKey]="'ENTITY_CODE'" 
+            placeholder="Designer"
+            [(ngModel)]="LENS_DESIGNER_CODE_selected">
+            </igx-simple-combo>
+        </div> -->
     </div>
 
-    <span class="choose-data">
-        <label for="data">Data:</label>
-        <select name="data" id="data">
-            <option value="$Sell-Thru">$Sell-Thru</option>
-            <option value="#On Hand">$On Hand</option>
-            <option value="$Promo">$Promo</option>
-            <option value="$Model">$Modeling</option>
-            <option value="$SThru/Spend">$SThru/Spend</option>
-            <option value="$Sell-In">$Sell-In</option>
-            <option value="$Inventory">$Inventory</option>
-        </select>
-    </span>
-
-    <span class="choose-entity">
-        <label for="entity">Entity:</label>
-        <select name="entity" id="entity">
-            <option value="Brands/Collections">Brands/Collections</option>
-            <option value="Customers/Regions">Customers/Regions</option>
-        </select>
-    </span>
-
-    <span>
-        <label for="brands">Brands:</label>
-        <select name="brands" id="brands" multiple>
-        <option *ngFor="let brand of brands" value="{{brand.BRAND_CODE}}">{{brand.BRAND_CODE}}</option>
-        </select>
-    </span>
 </div>
