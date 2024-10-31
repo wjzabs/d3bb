@@ -5,8 +5,6 @@ import {
   ViewChild
 } from '@angular/core';
 import * as d3 from 'd3';
-import { tooltip } from './tooltip';
-import { html } from 'd3';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -64,43 +62,68 @@ export class ScatterGraph2Component implements OnInit, OnChanges, OnDestroy, Aft
   private height = 400;
   private top = 5;
   private bottom = 20;
-  private left = 30;
+  private left = 60;
   private right = 30;
   tooltip?: unknown;
 
-  brands: any[] = [];
-  collections: any[] = [];
-  retail_sales: any[] = [];
+  ENTITY_GROUPs: any[] = [];
+  ENTITY_CODEs: any[] = [];
+  history: any[] = [];
   dates: any[] = [];
   
 intervalId!: any;
 sliderValue: number = 0; //  1; // 17;
-week: string = '';
+
+yyyyxx: string = '';
+yyyyxx_type: string = 'Weeks';
+initialized = false;
 
 private m = new Map()
 
-  constructor(private el: ElementRef) {}
+DATA_CODE_selected: string = "";
+dataOptions = [
+  {DATA_CODE: 'SLS', DATA_CAPTION: '$Sales'},
+  {DATA_CODE: 'JOBS', DATA_CAPTION: '#Jobs'},
+  {DATA_CODE: 'GPD', DATA_CAPTION: '$GP'},
+  {DATA_CODE: 'ASP', DATA_CAPTION: '$ASP'},
+]
+
+ENTITY_CODE_selected: string = "";
+entityOptions = [
+  {ENTITY_CODE: '1', ENTITY_CAPTION: 'Designs within Designers'},
+  {ENTITY_CODE: '2', ENTITY_CAPTION: 'Customers within Groups'},
+]
+
+LENS_DESIGNER_CODE_selected: string = "";
+
+  constructor(
+    private el: ElementRef,
+    // private cd: ChangeDetectorRef,
+    // private svc: AbblabService
+  ) {}
 
   async ngOnInit() {
 
+    await this.initializeState();
+    
+  }
+  
+  public async initializeState() {
+    
     await d3.json('assets/dates.json').then((data: any) => {
       this.dates = data;
-      // select JSON_OBJECT(YYYYWW,WEEK_END_DATE,LEGEND,YYYYPP,YYYYMM,REL_WEEK,MAX_WEEK) from (
-      //   SELECT * from GLTPARM3 WHERE YYYYPP BETWEEN '201907' AND '202406'
-      //   ) ORDER BY YYYYWW      
+     
     })
     // console.log(this.dates)
 
     await d3.json('assets/brands.json').then((data: any) => {
-      this.brands = data;
-      // select JSON_OBJECT(BRAND_CODE, BRAND_NAME) from (
-      //   SELECT BRAND_CODE, BRAND_NAME FROM ICTBRAN1
-      //   ) ORDER BY BRAND_CODE      
+      this.ENTITY_GROUPs = data;
+   
     })
     // console.log(this.brands)
 
     await d3.json('assets/collections.json').then((data: any) => {
-      this.collections = data;
+      this.ENTITY_CODEs = data;
       // select JSON_OBJECT(COLLECTION_CODE, COLLECTION_NAME, BRAND_CODE) from (
       //   SELECT COLLECTION_CODE, COLLECTION_NAME, BRAND_CODE FROM ICTCOLL1
       //   ) ORDER BY BRAND_CODE, COLLECTION_CODE      
@@ -108,26 +131,16 @@ private m = new Map()
     // console.log(this.collections)
 
     await d3.json('assets/retail_sales.json').then((data: any) => {
-      this.retail_sales = data;
-      // select JSON_OBJECT(BRAND_CODE, COLLECTION_CODE, OPS_YYYYWW, AMT_SOLD, QTY_SOLD, STORES) from (
-      //   SELECT ICTCOLL1.BRAND_CODE, ICTITEM1.COLLECTION_CODE, RSTRETL1.OPS_YYYYWW
-      //   , SUM (RSTRETL1.AMT_SOLD) AMT_SOLD, SUM (RSTRETL1.QTY_SOLD) QTY_SOLD
-      //   , COUNT (DISTINCT RSTRETL1.CUST_CODE || ':' || RSTRETL1.CUST_STORE_NO) STORES
-      //   FROM RSTRETL1, ICTITEM1, ICTCOLL1
-      //   WHERE RSTRETL1.OPS_YYYYWW BETWEEN '201907' AND '202406'
-      //   AND ICTITEM1.ITEM_CODE = RSTRETL1.ITEM_CODE
-      //   AND ICTCOLL1.COLLECTION_CODE = ICTITEM1.COLLECTION_CODE
-      //   GROUP BY ICTCOLL1.BRAND_CODE, ICTITEM1.COLLECTION_CODE, RSTRETL1.OPS_YYYYWW
-      //   ) ORDER BY BRAND_CODE, COLLECTION_CODE, OPS_YYYYWW      
+      this.history = data;
     })
     // console.log(this.retail_sales)
-    this.retail_sales.forEach(x => {
+    this.history.forEach(x => {
       x.AMT_SOLD = x.AMT_SOLD || 0
       x.QTY_SOLD = x.QTY_SOLD || 0
       x.STORES = x.STORES || 0
     })
 
-    this.initializeWeek()
+    this.initializeDate()
     // this.loadData()
 
     // console.log(this.dates)
@@ -144,22 +157,7 @@ console.log(this.slider.nativeElement.min, this.slider.nativeElement.max)
     this.setupTooltip();
     this.drawScatter();
   }
-  
 
-  setMinMax() {
-
-    this.xMax = d3.max(this.retail_sales, (d:any) => {return d.STORES}) as number;
-    this.xMin = d3.min(this.retail_sales, function(d) {return d.STORES}) as number;
-
-    this.yMax = d3.max(this.retail_sales, function(d) {return d.QTY_SOLD ? d.AMT_SOLD/d.QTY_SOLD : 0}) as number;
-    this.yMin = d3.min(this.retail_sales, function(d) {return d.QTY_SOLD ? d.AMT_SOLD/d.QTY_SOLD : 0}) as number;
-
-    this.rMax = d3.max(this.retail_sales, (d:ScatterDatum) => {return d.AMT_SOLD}) as number;
-    this.rMin = d3.min(this.retail_sales, (d:ScatterDatum) => {return d.AMT_SOLD}) as number;
-    this.rMax = 250000
-
-console.log(this.rMin, this.rMax)
-  }
 
   ngOnChanges(changes: SimpleChanges): void {
   }
@@ -173,6 +171,21 @@ console.log(this.rMin, this.rMax)
 //     this.slider.nativeElement.max = this.dates.length
 // console.log(this.slider.nativeElement.min, this.slider.nativeElement.max)
 
+  }	   
+
+  setMinMax() {
+
+    this.xMax = d3.max(this.history, (d:any) => {return d.STORES}) as number;
+    this.xMin = d3.min(this.history, function(d) {return d.STORES}) as number;
+
+    this.yMax = d3.max(this.history, function(d) {return d.QTY_SOLD ? d.AMT_SOLD/d.QTY_SOLD : 0}) as number;
+    this.yMin = d3.min(this.history, function(d) {return d.QTY_SOLD ? d.AMT_SOLD/d.QTY_SOLD : 0}) as number;
+
+    this.rMax = d3.max(this.history, (d:ScatterDatum) => {return d.AMT_SOLD}) as number;
+    this.rMin = d3.min(this.history, (d:ScatterDatum) => {return d.AMT_SOLD}) as number;
+    this.rMax = 250000
+
+console.log(this.rMin, this.rMax)
   }
 
   playClick() {
@@ -186,8 +199,8 @@ console.log(this.rMin, this.rMax)
   loadData() {
     let i = this.sliderValue
     let date = this.dates[i]
-    let YYYYWW: string = date.YYYYWW
-    let dataYW = this.retail_sales.filter(x => {return x.OPS_YYYYWW === YYYYWW})
+    let YYYYXX: string = date.YYYYWW
+    let dataYW = this.history.filter(x => {return x.OPS_YYYYWW === YYYYXX})
 
     this.m = new Map()
     dataYW.forEach((d:any) => { this.m.set(d.COLLECTION_CODE, d)})
@@ -217,7 +230,7 @@ console.log(this.rMin, this.rMax)
 
   initializeData() {
     // this.data = []
-    this.collections.forEach(x => {      
+    this.ENTITY_CODEs.forEach(x => {      
       let dp: ScatterDatum = {
         AMT_SOLD: 0,
         x: 0, 
@@ -256,11 +269,11 @@ startInterval() {
     } else {
 
       this.sliderValue +=1
+      this.initializeDate()
+      // this.cd.detectChanges()
 
-      this.initializeWeek()
-
-
-
+      // console.log(this.data)
+      // console.log(this.data[0].x, this.scaleX(this.data[0].x))
       d3.selectAll(".data")
       .transition()
       .duration(500)
@@ -268,7 +281,7 @@ startInterval() {
       .attr("cy", (d: any) => this.scaleY(d.y))
       .attr("r", (d: any) => this.scaleR(d.r))
     }
-  }, 500)
+  }, 1000)
 }
 
 stopInterval() {
@@ -277,10 +290,10 @@ stopInterval() {
   console.log('interval stopped')
 }
 
-initializeWeek() {
-  let weekData = this.dates[this.sliderValue]
-  // this.week = weekData.YYYYWW + ' Week Ending:' + weekData.WEEK_END_DATE
-  this.week = 'Week ' + this.format642(weekData.YYYYWW) + ' Ending ' + this.formatDate(weekData.WEEK_END_DATE)
+initializeDate() {
+  let dateData = this.dates[this.sliderValue]
+  // this.week = dateData.YYYYWW + ' Week Ending:' + dateData.WEEK_END_DATE
+  this.yyyyxx = 'Week ' + this.format642(dateData.YYYYWW) + ' Ending ' + this.formatDate(dateData.WEEK_END_DATE)
 
   this.loadData()
 }
@@ -368,7 +381,7 @@ format642(d: string) {
       '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000',
       '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080',
   ];
-  const brandCodes = this.brands.map(b => b.BRAND_CODE);
+  const brandCodes = this.ENTITY_GROUPs.map(b => b.BRAND_CODE);
   const colorScale = d3.scaleOrdinal()
       .domain(brandCodes)
       .range(customColors);
