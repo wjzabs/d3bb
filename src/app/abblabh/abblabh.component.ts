@@ -116,6 +116,7 @@ export class AbblabhComponent implements OnInit {
           .text(d => `${d.source.value.toLocaleString("en-US")} ${names[d.source.index]} → ${names[d.target.index]}${d.source.index !== d.target.index ? `\n${d.target.value.toLocaleString("en-US")} ${names[d.target.index]} → ${names[d.source.index]}` : ``}`);
     
       // return svg.node();
+      console.log('chord', svg)
       parentNode.appendChild(svg.node())
   }
 
@@ -129,6 +130,20 @@ export class AbblabhComponent implements OnInit {
 
 
   async chordUber(parentNode: any) {
+
+    
+  let cities: any;
+  let matrix: any;
+
+  await d3.csv('assets/cities.json').then((data: any) => {
+    cities = data;
+    console.log('cities', {data})
+  })
+
+  await d3.json('assets/matrix.json').then((data: any) => {
+    matrix = data;
+    console.log('matrix', {data})
+  })
 
   let width = 720,
       height = 720,
@@ -166,19 +181,6 @@ export class AbblabhComponent implements OnInit {
   //     .defer(d3.csv, "cities.csv")
   //     .defer(d3.json, "matrix.json")
   //     .await(ready);
-
-  let cities: any;
-  let matrix: any;
-
-  await d3.json('assets/cities.json').then((data: any) => {
-    cities = data;
-    console.log('cities', {data})
-  })
-
-  await d3.json('assets/matrix.json').then((data: any) => {
-    matrix = data;
-    console.log('matrix', {data})
-  })
 
     // Compute the chord layout.
     layout.matrix(matrix);
@@ -242,6 +244,7 @@ export class AbblabhComponent implements OnInit {
       });
     }
 
+    console.log('chordUber', svg)
     parentNode.appendChild(svg.node())
   }
 
