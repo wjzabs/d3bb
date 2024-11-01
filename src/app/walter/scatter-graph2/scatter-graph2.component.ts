@@ -1,5 +1,7 @@
 import { 
   AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component, ElementRef, EventEmitter, Input, OnChanges, 
   OnDestroy, OnInit, Output, SimpleChanges, 
   ViewChild
@@ -103,30 +105,33 @@ LENS_DESIGNER_CODE_selected: string = "";
   ) {}
 
   async ngOnInit() {
+    await this.initializeState();   
+  }		
 
-    await this.initializeState();
-    
+  ngOnChanges(changes: SimpleChanges): void {
   }
+
+  ngOnDestroy(): void {
+  }
+
+  async ngAfterViewInit() {
+    // await this.initializeState() // do not do this or else the bubbles will never apper
+  }	   
   
   public async initializeState() {
     
     await d3.json('assets/dates.json').then((data: any) => {
       this.dates = data;
-     
     })
     // console.log(this.dates)
 
     await d3.json('assets/brands.json').then((data: any) => {
       this.ENTITY_GROUPs = data;
-   
     })
     // console.log(this.brands)
 
     await d3.json('assets/collections.json').then((data: any) => {
-      this.ENTITY_CODEs = data;
-      // select JSON_OBJECT(COLLECTION_CODE, COLLECTION_NAME, BRAND_CODE) from (
-      //   SELECT COLLECTION_CODE, COLLECTION_NAME, BRAND_CODE FROM ICTCOLL1
-      //   ) ORDER BY BRAND_CODE, COLLECTION_CODE      
+      this.ENTITY_CODEs = data;   
     })
     // console.log(this.collections)
 
@@ -141,12 +146,11 @@ LENS_DESIGNER_CODE_selected: string = "";
     })
 
     this.initializeDate()
-    // this.loadData()
 
-    // console.log(this.dates)
     this.slider.nativeElement.min = 0
     this.slider.nativeElement.max = this.dates.length -1
-console.log(this.slider.nativeElement.min, this.slider.nativeElement.max)
+
+    console.log('this.slider', this.slider.nativeElement.min, this.slider.nativeElement.max, this.dates)
 
     this.setMinMax()
 
@@ -156,22 +160,9 @@ console.log(this.slider.nativeElement.min, this.slider.nativeElement.max)
     this.drawAxes();
     this.setupTooltip();
     this.drawScatter();
+
+    this.initialized = true;
   }
-
-
-  ngOnChanges(changes: SimpleChanges): void {
-  }
-
-  ngOnDestroy(): void {
-  }
-
-  ngAfterViewInit() {
-//     console.log(this.dates)
-//     this.slider.nativeElement.min = 1
-//     this.slider.nativeElement.max = this.dates.length
-// console.log(this.slider.nativeElement.min, this.slider.nativeElement.max)
-
-  }	   
 
   setMinMax() {
 
@@ -185,7 +176,9 @@ console.log(this.slider.nativeElement.min, this.slider.nativeElement.max)
     this.rMin = d3.min(this.history, (d:ScatterDatum) => {return d.AMT_SOLD}) as number;
     this.rMax = 250000
 
-console.log(this.rMin, this.rMax)
+    console.log('min/max/x', this.xMin, this.xMax)
+    console.log('min/max/y', this.yMin, this.yMax)
+    console.log('min/max/r', this.rMin, this.rMax)
   }
 
   playClick() {
@@ -200,11 +193,11 @@ console.log(this.rMin, this.rMax)
     let i = this.sliderValue
     let date = this.dates[i]
     let YYYYXX: string = date.YYYYWW
-    let dataYW = this.history.filter(x => {return x.OPS_YYYYWW === YYYYXX})
+    let dataYX = this.history.filter(x => {return x.OPS_YYYYWW === YYYYXX})
 
     this.m = new Map()
-    dataYW.forEach((d:any) => { this.m.set(d.COLLECTION_CODE, d)})
-    console.log({i, dataYW, m:this.m})
+    dataYX.forEach((d:any) => { this.m.set(d.COLLECTION_CODE, d)})
+    console.log({i, dataYX, m:this.m})
 
     if (this.data.length === 0) {this.initializeData()}
   
@@ -323,7 +316,8 @@ format642(d: string) {
         .style("border", "solid")
         .style("border-width", "1px")
         .style("border-radius", "5px")
-        .style("padding", "10px")
+        .style("padding", "30px")
+        .style("margin-left", "50px")
         .style("position", "absolute");
 
     this.svg = d3.select(nativeElement)
@@ -419,10 +413,6 @@ format642(d: string) {
           .attr("cx", (d: any) => scaleX(d.x) || 0)
           .attr("cy", (d: any) => scaleY(d.y))
           .attr("r", (d: any) => scaleR(d.r))
-
-          // .attr("cx", (d: any) => this.scaleX(d.x))
-          // .attr("cy", (d: any) => this.scaleY(d.y))
-          // .attr("r", (d: any) => this.scaleR(d.r))
           .attr("class", "data")
           .attr("id", (d: any) => d.COLLECTION_CODE) // this needs to be changed to the key of the data Map
           // .attr("fill", 'red')
@@ -455,19 +445,22 @@ format642(d: string) {
               .style("top", rawY + 'px')
               // .style("left", (event.pageX + "px"))
               // .style("top", ((event.pageY) + "px"))  
+              // .style("left", posX + 'px')
+              // .style("top", posY + 'px')
               .style('opacity', 1)
           })
           .on("mousemove", (event: any, d: any) => {
+
           })
           .on("mouseout", (event: any, d: any) => {
             // hide tooltip
             d3.select('#tooltip')
               .transition()
-              .duration(200)
+              .duration(500)
               .style("opacity", 0)
           })
           .on("click", (d: any) => {
-            // console.log('click', {d});
+            // console.log('click circle', {d});
           })
           .call(d3.drag()
             .on("start", null)
@@ -485,6 +478,21 @@ format642(d: string) {
   }
 
   private drawLegend(colorScale: any) {
+
+    
+    this.mainGroup.append("text")
+      .attr("x", 12)
+      .attr("y", 6)
+      .attr("class", "label")
+      .text("ASP");
+
+      this.mainGroup.append("text")
+      .attr("x", this.svgWidth - 60)
+      .attr("y", this.svgHeight - 20)
+      .attr("text-anchor", "end")
+      .attr("class", "label")
+      .text("Stores");
+
     const legend = this.mainGroup.selectAll('.legend') //creating the legend itself
         .data(colorScale.domain())
         .enter()

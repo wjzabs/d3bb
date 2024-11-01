@@ -13,6 +13,7 @@ import { MapsalesComponent } from './mapsales/mapsales.component';
 import { D3brushComponent } from './d3brush/d3brush.component';
 import { WeatherComponent } from './weather/weather.component';
 import { Mapsales2Component } from './mapsales2/mapsales2.component';
+import { AbblabhComponent } from './abblabh/abblabh.component';
 
 export const routes: Routes = [
     {path: '', component: BaseballComponent},
@@ -30,5 +31,7 @@ export const routes: Routes = [
     {path: 'walter', component: WalterComponent},
     {path: 'maptest', component: MaptestComponent},
     {path: 'geocoding', component: GeocodingComponent},
+    {path: 'chord', component: AbblabhComponent},
+    
     
 ];
