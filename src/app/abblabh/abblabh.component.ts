@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit } from '@angular/core';
 import * as d3 from 'd3';
 
 @Component({
@@ -8,23 +8,29 @@ import * as d3 from 'd3';
 })
 export class AbblabhComponent implements OnInit {
 
+  // look for the comment " // error on this line" for issues
+
   data: any;
 
+  constructor(
+    private element: ElementRef
+  ) {}
+
   async ngOnInit() {
-    // look for the comment " // error on this line" for issues
+
   }
 
   async showChord() {
-    this.chart();
+    this.chord(this.element.nativeElement);
     //https://observablehq.com/@d3/chord-diagram/2
   }
 
   async showUber() {
-    this.chordUber();
+    this.chordUber(this.element.nativeElement);
     //https://bost.ocks.org/mike/uberdata/
   }
 
-  chart() {
+  chord(parentNode: any) {
         
     this.data = Object.assign([
       [11975,  5871, 8916, 2868],
@@ -56,12 +62,16 @@ export class AbblabhComponent implements OnInit {
       const ribbon = d3.ribbon()
           .radius(innerRadius);
     
+          console.log('this.data', this.data)
+
       const svg = d3.create("svg")
           .attr("width", width)
           .attr("height", height)
           .attr("viewBox", [-width / 2, -height / 2, width, height])
           .attr("style", "max-width: 100%; height: auto; font: 10px sans-serif;");
     
+        console.log({svg})
+
       const chords = chord(this.data);
     
       const group = svg.append("g")
@@ -105,8 +115,8 @@ export class AbblabhComponent implements OnInit {
         .append("title")
           .text(d => `${d.source.value.toLocaleString("en-US")} ${names[d.source.index]} → ${names[d.target.index]}${d.source.index !== d.target.index ? `\n${d.target.value.toLocaleString("en-US")} ${names[d.target.index]} → ${names[d.source.index]}` : ``}`);
     
-      return svg.node();
-
+      // return svg.node();
+      parentNode.appendChild(svg.node())
   }
 
 
@@ -118,14 +128,14 @@ export class AbblabhComponent implements OnInit {
   }
 
 
-  async chordUber() {
+  async chordUber(parentNode: any) {
 
   let width = 720,
       height = 720,
       outerRadius = Math.min(width, height) / 2 - 10,
       innerRadius = outerRadius - 24;
 
-  var formatPercent = d3.format(".1%");
+  let formatPercent = d3.format(".1%");
 
   // let arc = d3.svg.arc() // error on this line
   let arc = (d3.svg as any).arc()
@@ -174,7 +184,7 @@ export class AbblabhComponent implements OnInit {
     layout.matrix(matrix);
 
     // Add a group per neighborhood.
-    var group = svg.selectAll(".group")
+    let group = svg.selectAll(".group")
         .data(layout.groups)
       .enter().append("g")
         .attr("class", "group")
@@ -186,13 +196,13 @@ export class AbblabhComponent implements OnInit {
     });
 
     // Add the group arc.
-    var groupPath = group.append("path")
+    let groupPath = group.append("path")
         .attr("id", function(d, i) { return "group" + i; })
         .attr("d", arc)
         .style("fill", function(d, i) { return cities[i].color; });
 
     // Add a text label.
-    var groupText = group.append("text")
+    let groupText = group.append("text")
         .attr("x", 6)
         .attr("dy", 15);
 
@@ -231,6 +241,8 @@ export class AbblabhComponent implements OnInit {
             && p.target.index != i;
       });
     }
+
+    parentNode.appendChild(svg.node())
   }
 
 }
