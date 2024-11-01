@@ -17,7 +17,7 @@ export class AbblabhComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
-
+    console.log(d3)
   }
 
   async showChord() {
@@ -153,7 +153,9 @@ export class AbblabhComponent implements OnInit {
   let formatPercent = d3.format(".1%");
 
   // let arc = d3.svg.arc() // error on this line
-  let arc = (d3.svg as any).arc()
+  // ERROR TypeError: d316.svg.arc is not a function
+  // let arc = d3.arc() // this compiles but does not work when used below
+    let arc = (d3.svg as any).arc()
       .innerRadius(innerRadius)
       .outerRadius(outerRadius);
 
@@ -164,6 +166,7 @@ export class AbblabhComponent implements OnInit {
       .sortChords(d3.ascending);
 
   // let path = d3.svg.chord() // error on this line
+  // let path = d3.chord() // this compiles but does not work because it does not have a .radius method
   let path = (d3.svg as any).chord()
       .radius(innerRadius);
 
