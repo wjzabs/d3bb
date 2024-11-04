@@ -12,6 +12,7 @@ import { GeocodingComponent } from './geocoding/geocoding.component';
 import { MapsalesComponent } from './mapsales/mapsales.component';
 import { D3brushComponent } from './d3brush/d3brush.component';
 import { WeatherComponent } from './weather/weather.component';
+import { AmeliaComponent } from './amelia/amelia.component';
 import { Mapsales2Component } from './mapsales2/mapsales2.component';
 import { AbblabhComponent } from './abblabh/abblabh.component';
 
@@ -27,6 +28,7 @@ export const routes: Routes = [
     {path: 'mapsales2', component: Mapsales2Component},
     {path: 'brush', component: D3brushComponent},
     {path: 'weather', component: WeatherComponent},
+    {path: 'amelia', component: AmeliaComponent},
     {path: 'jeffery', component: JefferyComponent},
     {path: 'walter', component: WalterComponent},
     {path: 'maptest', component: MaptestComponent},

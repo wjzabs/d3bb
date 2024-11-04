@@ -1,0 +1,54 @@
+<div #container>
+  <app-chart
+    [dimensions]="dimensions">
+    <svg:defs>
+      <svg:g appGradient
+        [id]="gradientId"
+        [attr.colors]="gradientColors"
+        [attr.x2]="zero"
+        [attr.y2]="hundredPct"
+      >
+      </svg:g>
+    </svg:defs>
+    <svg:g appAxis
+      dimension="x"
+      [attr.dimensions]="dimensions"
+      [attr.scale]="xScale"
+      [attr.formatTick]="formatDate"
+      [attr.label]="label">
+    </svg:g>
+    <svg:g appAxis
+      dimension="y"
+      [attr.dimensions]="dimensions"
+      [attr.scale]="yScale"
+      [attr.label]="label">
+    </svg:g>
+    <svg:g appLine
+      type="area"
+      [attr.data]="data"
+      [attr.xAccessor]="xAccessorScaled"
+      [attr.yAccessor]="yAccessorScaled"
+      [attr.y0Accessor]="y0AccessorScaled"
+      [style.fill]="'url(#{{ gradientId }})'">
+    </svg:g>
+    <svg:g appLine
+      [attr.data]="data"
+      [attr.xAccessor]="xAccessorScaled"
+      [attr.yAccessor]="yAccessorScaled">
+    </svg:g>
+
+    <svg x="10" y="20">
+      <g *ngFor="let d of data" >
+        <rect 
+          [attr.x]="xAccessorScaled(d)" 
+          [attr.y]="xAccessorScaled(d)" 
+          height="25" 
+          width="50"
+          fill="blue">
+        </rect>
+      </g>
+    </svg>
+
+
+  </app-chart>
+</div>

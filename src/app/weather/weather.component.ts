@@ -29,11 +29,17 @@ async function drawLineChart() { // drawLineChart<T>() {
   // )
 
   console.table((dataset as any[])[0])
+  
+  console.log('check out date - now', dataset[0].date, dataset[0])
+  dataset[0].date="2019-01-01"
 
   const yAccessor = (d:any) => (d['temperatureMax'] as number) || 0
   const dateParser = d3.timeParse("%Y-%m-%d")
   const xAccessor = (d:any) => (dateParser(d.date) as Date)
   
+  const dateParserYYYYPP = d3.timeParse("%Y%m")
+  console.log(dateParserYYYYPP("202409"))
+
   // 2. Create chart dimensions
 
   let dims = {
@@ -62,11 +68,13 @@ async function drawLineChart() { // drawLineChart<T>() {
     .append("svg")
       .attr("width", dims.width)
       .attr("height", dims.height)
+      .style("outline", "1px solid red")
       
   const chart = wrapper.append("g")
   .style("transform", `translate(
     ${dims.margin.left}px, 
     ${dims.margin.top}px)`)
+  .style("outline", "1px solid blue")
     
   // 4. Create scales
 
@@ -74,6 +82,7 @@ async function drawLineChart() { // drawLineChart<T>() {
     // .domain(d3.extent(dataset, yAccessor))
     // https://stackoverflow.com/questions/52124689/argument-of-type-string-string-error-in-angular-and-d3
     .domain(<[number, number]>d3.extent(dataset, yAccessor))
+    // .domain([31,70]) // with this domain you can see what happens to points that plot off the svg
     .range([dims.innerHeight, 0])
 
 const freezingTemperaturePlacement = yScale(32)
@@ -83,6 +92,12 @@ const freezingTemperatures = chart.append("rect")
     .attr("y", freezingTemperaturePlacement)
     .attr("height", dims.innerHeight
       - freezingTemperaturePlacement)
+    .attr("fill", "#e0f3f3")
+
+  const chartTitle = chart.append("text")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("text", "NYC High Temperatures by Day")
     .attr("fill", "#e0f3f3")
 
 const xScale = d3.scaleTime()
@@ -102,12 +117,20 @@ const xScale = d3.scaleTime()
       .attr("fill", "none")
       .attr("stroke", "#af9358")
       .attr("stroke-width", 2)
+      .style("outline", "1px solid orange")
 
   // 6. Draw peripherals
 
-  const yAxisGenerator = d3.axisLeft(yScale) // .scale(yScale)
+  const yAxisGenerator = d3.axisLeft(yScale) // or .scale(yScale)
   const yAxis = chart.append("g")
-    .call(yAxisGenerator)
+    // .call(yAxisGenerator)
+  yAxisGenerator(yAxis)
+
+  const yAxisGenerator2 = d3.axisRight(yScale) // or .scale(yScale)
+  const yAxis2 = chart.append("g")
+      .style("color", "orange")
+    .call(yAxisGenerator2)
+  
 
   const xAxisGenerator = d3.axisBottom(xScale) // .scale(xScale)
   const xAxis = chart.append("g")

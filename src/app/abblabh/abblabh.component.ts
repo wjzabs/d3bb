@@ -32,20 +32,48 @@ export class AbblabhComponent implements OnInit {
 
   chord(parentNode: any) {
         
-    this.data = Object.assign([
-      [11975,  5871, 8916, 2868],
+    this.data = Object.assign([ // this takes the 1st object - which is an array of arrays
+      [11975,  5871, 8916, 2868], // and de-structures each if the inner arrays as object properties
       [ 1951, 10048, 2060, 6171],
       [ 8010, 16145, 8090, 8045],
       [ 1013,   990,  940, 6907]
-    ], {
+    ], { // and then copies the properties of the 2nd object (names, and colors) into the 1st object
       names: ["black", "blond", "brown", "red"],
       colors: ["#000000", "#ffdd89", "#957244", "#f26223"]
-    })
-      const width = 640;
-      const height = width;
-      const outerRadius = Math.min(width, height) * 0.5 - 30;
+    }) // abd stores the result into data, as well into object1
+
+    console.log('this.data', this.data)
+    
+  // 2. Create chart dimensions
+
+  let dims = {
+    width: 640, // window.innerWidth * 0.9,
+    height: 640, // 400,
+    innerWidth: 0,
+    innerHeight: 0,
+    margin: {
+      top: 20,
+      right: 20,
+      bottom: 20,
+      left: 20,
+    },
+  }
+
+  dims.innerWidth = dims.width
+    - dims.margin.left
+    - dims.margin.right
+  dims.innerHeight = dims.height
+    - dims.margin.top
+    - dims.margin.bottom
+
+
+      // const width = 640;
+      // const height = width;
+
+      const outerRadius = Math.min(dims.width, dims.height) * 0.5 - 30;
       const innerRadius = outerRadius - 20;
-      const {names, colors} = this.data;
+      const {names, colors} = this.data; // de-structuring?
+      // console.log(names, this.data.names) // these are the same
       const sum = d3.sum(this.data.flat());
       const tickStep = d3.tickStep(0, sum, 100);
       const tickStepMajor = d3.tickStep(0, sum, 20);
@@ -61,13 +89,11 @@ export class AbblabhComponent implements OnInit {
     
       const ribbon = d3.ribbon()
           .radius(innerRadius);
-    
-          console.log('this.data', this.data)
 
       const svg = d3.create("svg")
-          .attr("width", width)
-          .attr("height", height)
-          .attr("viewBox", [-width / 2, -height / 2, width, height])
+          .attr("width", dims.width)
+          .attr("height", dims.height)
+          .attr("viewBox", [-dims.width / 2, -dims.height / 2, dims.width, dims.height])
           .attr("style", "max-width: 100%; height: auto; font: 10px sans-serif;");
     
         console.log({svg})

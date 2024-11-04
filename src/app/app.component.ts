@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 
 import { D3Service, D3_DIRECTIVES } from './d3';
 import { SHARED_VISUALS } from './visuals/shared';
+// import { AmeliaModule } from './amelia/amelia.module';
 
 @Component({
   selector: 'app-root',
