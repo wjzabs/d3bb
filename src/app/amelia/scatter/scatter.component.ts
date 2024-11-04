@@ -2,11 +2,13 @@ import { Component, Input, ViewChild, ElementRef, AfterContentInit, OnChanges, S
 import * as d3 from "d3"
 import { DimensionsType, ScaleType, AccessorType } from '../utils/types';
 import { ChartComponent } from '../chart/chart.component';
+import { AxisComponent } from '../chart/axis/axis.component';
+import { CirclesComponent } from '../chart/circles/circles.component';
 
 @Component({
   selector: 'app-scatter',
   standalone: true,
-  imports: [ChartComponent],
+  imports: [ChartComponent, AxisComponent, CirclesComponent],
   templateUrl: './scatter.component.html',
   styleUrls: ['./scatter.component.css']
 })
@@ -18,8 +20,8 @@ export class ScatterComponent implements AfterContentInit, OnChanges {
   @Input() yAccessor!: AccessorType
   public keyAccessor: AccessorType = (i:number) => i
   public dimensions: DimensionsType
-  public xScale!: any // ScaleType
-  public yScale!: any // ScaleType
+  public xScale!: ScaleType
+  public yScale!: ScaleType
   public xAccessorScaled!: AccessorType
   public yAccessorScaled!: AccessorType
   @ViewChild('container', {static: true}) container!: ElementRef

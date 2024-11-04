@@ -17,7 +17,7 @@ constructor() {
 }
 
 ngOnInit() {
-  console.log('chart ngOnInit', this.dimensions)
+  // console.log('chart ngOnInit', this.dimensions)
 }
 }
 

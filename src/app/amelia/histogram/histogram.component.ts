@@ -3,11 +3,14 @@ import * as d3 from "d3"
 import { DimensionsType, getUniqueId } from '../chart/utils';
 import { ScaleType, AccessorType } from '../utils/types';
 import { ChartComponent } from '../chart/chart.component';
+import { GradientComponent } from '../chart/gradient/gradient.component';
+import { AxisComponent } from '../chart/axis/axis.component';
+import { BarsComponent } from '../chart/bars/bars.component';
 
 @Component({
   selector: 'app-histogram',
   standalone: true,
-  imports: [ChartComponent],
+  imports: [ChartComponent, GradientComponent, AxisComponent, BarsComponent],
   templateUrl: './histogram.component.html',
   styleUrls: ['./histogram.component.css'],
 })
@@ -18,8 +21,8 @@ export class HistogramComponent implements AfterContentInit, OnChanges {
   public dimensions: DimensionsType
   public xAccessorScaled!: AccessorType
   public yAccessorScaled!: AccessorType
-  public xScale!: any; // ScaleType
-  public yScale!: any; // ScaleType
+  public xScale!: ScaleType
+  public yScale!: ScaleType
   public widthAccessorScaled!: AccessorType
   public heightAccessorScaled!: AccessorType
   public keyAccessor!: AccessorType

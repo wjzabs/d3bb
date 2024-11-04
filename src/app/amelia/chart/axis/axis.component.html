@@ -1,11 +1,10 @@
-<ng-template *ngIf="(dimension === 'x')">
-<svg:g
+<svg:g 
+  *ngIf="dimension === 'x'"
   class="x"
   attr.transform="translate(0, {{dimensions.boundedHeight}})">
   <svg:line
     [attr.x2]="dimensions.boundedWidth">
   </svg:line>
-  
   <svg:text
       *ngFor="let tick of ticks"
       class="tick"
@@ -19,9 +18,6 @@
     {{ label }}
   </svg:text>
 </svg:g>
-
-</ng-template>
-
 
 <svg:g
   class="y"

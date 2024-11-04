@@ -3,21 +3,21 @@
     [dimensions]="dimensions">
     <svg:g appAxis
       dimension="x"
-      [attr.dimensions]="dimensions"
-      [attr.scale]="xScale"
-      [attr.label]="xLabel">
+      [dimensions]="dimensions"
+      [scale]="xScale"
+      [label]="xLabel">
     </svg:g>
     <svg:g appAxis
       dimension="y"
-      [attr.dimensions]="dimensions"
-      [attr.scale]="yScale"
-      [attr.label]="yLabel">
+      [dimensions]="dimensions"
+      [scale]="yScale"
+      [label]="yLabel">
     </svg:g>
     <svg:g appCircles
-      [attr.data]="data"
-      [attr.keyAccessor]="keyAccessor"
-      [attr.xAccessor]="xAccessorScaled"
-      [attr.yAccessor]="yAccessorScaled">
+      [data]="data"
+      [keyAccessor]="keyAccessor"
+      [xAccessor]="xAccessorScaled"
+      [yAccessor]="yAccessorScaled">
     </svg:g>
   </app-chart>
 </div>

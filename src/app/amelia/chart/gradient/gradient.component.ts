@@ -51,6 +51,6 @@ export class GradientComponent implements OnChanges {
       color: color,
     }))
 
-    console.log('this.colorStops', this.colorStops)
+    // console.log('this.colorStops', this.colorStops)
   }
 }

@@ -4,32 +4,32 @@
     <svg:defs>
       <svg:g appGradient
         [id]="gradientId"
-        [attr.colors]="gradientColors"
-        [attr.x2]="zero"
-        [attr.y2]="hundredPct"
+        [colors]="gradientColors"
+        [x2]="zero"
+        [y2]="hundredPct"
       >
       </svg:g>
     </svg:defs>
     <svg:g appAxis
       dimension="x"
-      [attr.dimensions]="dimensions"
-      [attr.scale]="xScale"
-      [attr.label]="label">
+      [dimensions]="dimensions"
+      [scale]="xScale"
+      [label]="label">
     </svg:g>
     <svg:g appAxis
       dimension="y"
-      [attr.dimensions]="dimensions"
-      [attr.scale]="yScale"
+      [dimensions]="dimensions"
+      [scale]="yScale"
       label="Count">
     </svg:g>
     <svg:g appBars
-      [attr.data]="bins"
-      [attr.keyAccessor]="keyAccessor"
-      [attr.xAccessor]="xAccessorScaled"
-      [attr.yAccessor]="yAccessorScaled"
-      [attr.widthAccessor]="widthAccessorScaled"
-      [attr.heightAccessor]="heightAccessorScaled"
-      [attr.fill]="'url(#{{ gradientId }})'">
+      [data]="bins"
+      [keyAccessor]="keyAccessor"
+      [xAccessor]="xAccessorScaled"
+      [yAccessor]="yAccessorScaled"
+      [widthAccessor]="widthAccessorScaled"
+      [heightAccessor]="heightAccessorScaled"
+      fill="url(#{{ gradientId }})">
     </svg:g>
   </app-chart>
 </div>

@@ -35,7 +35,7 @@ export class AmeliaComponent {
     this.temperatureAccessor = d => d.temperature
     this.humidityAccessor = d => d.humidity
     this.getData()
-    // setInterval(() => this.getData(), 4000)
+    setInterval(() => this.getData(), 4000)
   }
 
 

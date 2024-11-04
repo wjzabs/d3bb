@@ -7,6 +7,8 @@ import { curveMonotoneSolver } from '../../curveMonotoneSolver'
 
 @Component({
   selector: '[appLine]',
+  standalone: true,
+  imports: [],
   template: `
     <svg:path
       [attr.class]="type" 

@@ -4,40 +4,40 @@
     <svg:defs>
       <svg:g appGradient
         [id]="gradientId"
-        [attr.colors]="gradientColors"
-        [attr.x2]="zero"
-        [attr.y2]="hundredPct"
+        [colors]="gradientColors"
+        [x2]="zero"
+        [y2]="hundredPct"
       >
       </svg:g>
     </svg:defs>
     <svg:g appAxis
       dimension="x"
-      [attr.dimensions]="dimensions"
-      [attr.scale]="xScale"
-      [attr.formatTick]="formatDate"
-      [attr.label]="label">
+      [dimensions]="dimensions"
+      [scale]="xScale"
+      [formatTick]="formatDate"
+      [label]="label">
     </svg:g>
     <svg:g appAxis
       dimension="y"
-      [attr.dimensions]="dimensions"
-      [attr.scale]="yScale"
-      [attr.label]="label">
+      [dimensions]="dimensions"
+      [scale]="yScale"
+      [label]="label">
     </svg:g>
     <svg:g appLine
       type="area"
-      [attr.data]="data"
-      [attr.xAccessor]="xAccessorScaled"
-      [attr.yAccessor]="yAccessorScaled"
-      [attr.y0Accessor]="y0AccessorScaled"
-      [style.fill]="'url(#{{ gradientId }})'">
+      [data]="data"
+      [xAccessor]="xAccessorScaled"
+      [yAccessor]="yAccessorScaled"
+      [y0Accessor]="y0AccessorScaled"
+      fill="url(#{{ gradientId }})">
     </svg:g>
     <svg:g appLine
-      [attr.data]="data"
-      [attr.xAccessor]="xAccessorScaled"
-      [attr.yAccessor]="yAccessorScaled">
+      [data]="data"
+      [xAccessor]="xAccessorScaled"
+      [yAccessor]="yAccessorScaled">
     </svg:g>
 
-    <svg x="10" y="20">
+    <!-- <svg x="10" y="20">
       <g *ngFor="let d of data" >
         <rect 
           [attr.x]="xAccessorScaled(d)" 
@@ -47,7 +47,7 @@
           fill="blue">
         </rect>
       </g>
-    </svg>
+    </svg> -->
 
 
   </app-chart>

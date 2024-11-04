@@ -4,11 +4,14 @@ import { getUniqueId } from '../chart/utils'
 import { DimensionsType, ScaleType, AccessorType } from '../utils/types'
 import { ChartComponent } from '../chart/chart.component'
 import { NgFor } from '@angular/common'
+import { LineComponent } from '../chart/line/line.component'
+import { AxisComponent } from '../chart/axis/axis.component'
+import { GradientComponent } from '../chart/gradient/gradient.component'
 
 @Component({
   selector: 'app-timeline',
   standalone: true,
-  imports: [ChartComponent, NgFor],
+  imports: [ChartComponent, NgFor, LineComponent, AxisComponent, GradientComponent],
   templateUrl: './timeline.component.html',
   styleUrls: ['./timeline.component.css'],
 })
@@ -20,8 +23,6 @@ export class TimelineComponent implements OnInit, AfterContentInit, OnChanges {
   public dimensions: DimensionsType
   public xScale!: ScaleType
   public yScale!: ScaleType
-  // public xScale!: any // ScaleType
-  // public yScale!: any // ScaleType
   public xAccessorScaled!: AccessorType
   public yAccessorScaled!: AccessorType
   public y0AccessorScaled!: AccessorType
@@ -54,7 +55,7 @@ export class TimelineComponent implements OnInit, AfterContentInit, OnChanges {
   }
 
   ngOnInit(): void {
-    console.log(this.data)
+    // console.log(this.data)
   }
   
   @HostListener('window:resize') windowResize() {
@@ -80,14 +81,9 @@ export class TimelineComponent implements OnInit, AfterContentInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     this.updateScales()
 
-
-    console.log('this.data[10]', this.data[10])
-    // console.log('this.xAccessor', this.xScale(this.xAccessor(this.data[10])))
-    // console.log('this.yAccessor', this.yScale(this.yAccessor(this.data[10])))
-
-    console.log('this.xAccessorScaled', this.xAccessorScaled(this.data[10]))
-    console.log('this.yAccessorScaled', this.yAccessorScaled(this.data[10]))
-
+    // console.log('this.data[10]', this.data[10])
+    // console.log('this.xAccessorScaled', this.xAccessorScaled(this.data[10]))
+    // console.log('this.yAccessorScaled', this.yAccessorScaled(this.data[10]))
   }
 
   updateScales() {

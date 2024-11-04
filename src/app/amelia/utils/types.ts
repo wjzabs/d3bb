@@ -1,10 +1,3 @@
-// export interface ScaleType {
-//     (d: object): any,
-//     range: Function,
-//     domain: Function,
-//     ticks: Function,
-// }
-
 export interface ScaleType {
   (d: any): any,
   range: any,

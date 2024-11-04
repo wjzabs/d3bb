@@ -10,6 +10,8 @@ import { NgFor, NgTemplateOutlet } from '@angular/common'
 
 @Component({
   selector: '[appBars]',
+  standalone: true,
+  imports: [NgFor, NgTemplateOutlet],
   template: `
     <svg:rect
       *ngFor="let bar of data; trackBy: keyAccessor"
@@ -20,8 +22,6 @@ import { NgFor, NgTemplateOutlet } from '@angular/common'
       [attr.fill]="fill || '#9980FA'">
     </svg:rect>
   `,
-  standalone: true,
-  imports: [NgFor, NgTemplateOutlet],
   styleUrls: ['./bars.component.css']
 })
 export class BarsComponent {
