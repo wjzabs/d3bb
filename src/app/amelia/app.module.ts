@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 // import { AppComponent } from './app.component';
 import { HttpClientModule } from '@angular/common/http';
-import { AmeliaModule } from './amelia.module';
+// import { AmeliaModule } from './amelia.module';
 import { CommonModule } from '@angular/common';
 
 @NgModule({
@@ -13,7 +13,7 @@ import { CommonModule } from '@angular/common';
 
         HttpClientModule,
         BrowserAnimationsModule,
-        AmeliaModule,
+        // AmeliaModule,
     ],
     providers: [],
     bootstrap: [], // AppComponent

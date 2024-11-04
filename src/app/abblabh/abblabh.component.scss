@@ -224,3 +224,8 @@ path.chord {
 #circle:hover path.fade {
   display: none;
 }
+
+
+.labels text:nth-child(4n) {
+  display: none;
+}
