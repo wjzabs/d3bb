@@ -10,6 +10,10 @@
     visibility: hidden;
     white-space: nowrap;
     pointer-events: none;
+    strong {
+      font-weight: bold;
+      color: #ffdd89;
+    }
   }
   #circle circle {
     fill: none;

@@ -13,6 +13,7 @@ export class Chord2Component implements OnInit {
   constructor(private element: ElementRef) {}
 
   ngOnInit(): void {
+    
     this.hair();
   }
 
@@ -28,6 +29,7 @@ export class Chord2Component implements OnInit {
     let mapCaption = new Map()
     mapCaption.set(f1,'Designer')
     mapCaption.set(f2,'AR Group')
+    mapCaption.set(f3,'Jobs')
     
     let total = 0
     total = data.reduce((prev, curr) => { return prev += curr[f3]}, 0)
@@ -49,6 +51,13 @@ export class Chord2Component implements OnInit {
     // })
     console.log({data})
 
+    const designerTotalJobs = new Map();
+    data.forEach(d => {
+      if (d['Field1'].startsWith(f1)) {
+        const designer = d['Field1'];
+        designerTotalJobs.set(designer, (designerTotalJobs.get(designer) || 0) + d['JOBS']);
+      }
+    });
 
     //get the colors 
     //const names1 = Array.from(new Set(data.map(d => f1 + ':' + d[f1])));
@@ -79,13 +88,13 @@ export class Chord2Component implements OnInit {
       matrix[sourceIndex][targetIndex] = +d[f3];
     });
 
-    this.drawChordDiagram(matrix, names, mColor, mapCaption, total);
+    this.drawChordDiagram(matrix, names, mColor, mapCaption, total, designerTotalJobs, f1, f2, f3);
   }
 
-  drawChordDiagram(matrix: number[][], names: string[], mColor: any, mapCaption: any, total: number): void {
+  drawChordDiagram(matrix: number[][], names: string[], mColor: any, mapCaption: any, total: number, designerTotalJobs: Map<string, number>, f1: string, f2: string, f3: string): void {
     const width = 1000;
     const height = 1000;
-    const outerRadius = Math.min(width, height) * 0.5 - 50;
+    const outerRadius = Math.min(width, height) * 0.35;
     const innerRadius = outerRadius - 30;
 
   
@@ -98,6 +107,7 @@ export class Chord2Component implements OnInit {
       "#d62728" // red 
     ]); 
   
+    
 
   //layout of circle, with a space between each
     const chord = d3.chord()
@@ -118,6 +128,53 @@ export class Chord2Component implements OnInit {
       .attr("viewBox", `${-width / 2} ${-height / 2} ${width} ${height}`)
       .style("font", "10px sans-serif");
 
+      svg.append("text")
+      .attr("x", 0)
+      .attr("y", -height / 2 + 30)
+      .attr("text-anchor", "middle")
+      .style("font-size", "24px")
+      .style("font-weight", "bold")
+      .text(`${mapCaption.get(f3)} by ${mapCaption.get(f1)} and ${mapCaption.get(f2)}`);
+
+      svg.append("text")
+      .attr("x", 0)
+      .attr("y", -height / 2 + 70)
+      .attr("text-anchor", "middle")
+      .style("font-size", "16px")
+      .style("font-weight", "bold")
+      .text(`Total ${mapCaption.get(f3)}: ${d3.format(",")(total)}`);
+
+      const legend = svg.append("g")
+      .attr("transform", `translate(${-(width / 2) + 20}, ${-height / 2 + 80})`);
+
+    // Legend for f1 (blue)
+    legend.append("rect")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("width", 15)
+      .attr("height", 15)
+      .attr("fill", "blue");
+
+    legend.append("text")
+      .attr("x", 25)
+      .attr("y", 12)
+      .style("font-size", "14px")
+      .text(mapCaption.get(f1));
+
+    // Legend for f2 (pink)
+    legend.append("rect")
+      .attr("x", 0)
+      .attr("y", 25)
+      .attr("width", 15)
+      .attr("height", 15)
+      .attr("fill", "pink");
+
+    legend.append("text")
+      .attr("x", 25)
+      .attr("y", 37)
+      .style("font-size", "14px")
+      .text(mapCaption.get(f2));
+
     const chords = chord(matrix);
 
 // new group for every color
@@ -133,10 +190,16 @@ export class Chord2Component implements OnInit {
       .attr("stroke", d => d3.color(color(names[d.index]) as string)?.darker()?.toString() || "#000")
       .attr("d", arc as any)
       .append("title")
+      .html(d => {
+        const designer = names[d.index];
+        const designerJobs = designerTotalJobs.get(designer) || 1; 
+        const percentage = d3.format(".1%")(d.value / total); 
+        return `<strong>${mapCaption.get(designer.split(':')[0])}</strong> ${designer.split(':')[1]}: <strong>${d3.format(",")(d.value)}</strong> ${mapCaption.get(f3)}, <strong>${percentage}</strong>`;
+      });
       // .text(d => `${names[d.index]}: ${d.value}`);
-      .text(d => mapCaption.get(names[d.index].split(':')[0]) + ' ' + names[d.index].split(':')[1] + ': ' + d3.format(",.0f")(d.value) + ' Jobs, ' + d3.format(",.0f")(100 * d.value / total) + '%');
-      
+      //.text(d => `${mapCaption.get(names[d.index].split(':')[0])} ${names[d.index].split(':')[1]}: ${d3.format(",.0f")(d.value)} ${mapCaption.get(f3)}, ${d3.format(",.0f")(100 * d.value / total)}%`);
       // Add labels to each segment (hair color)
+
       group.append("text")
       .attr("dy", ".35em")
       .attr("transform", d => {
@@ -189,9 +252,16 @@ export class Chord2Component implements OnInit {
     .attr("stroke", d => d3.color(color(names[d.source.index]) as string)?.darker()?.toString() || "#000")
     .style("opacity", d => Math.max(0.3, d.source.value / (d3.max(matrix.flat()) || 1)))
     .append("title")
+    .html(d => {
+      const sourceDesigner = names[d.source.index];
+      const targetGroup = names[d.target.index];
+      const designerJobs = designerTotalJobs.get(sourceDesigner) || 1;
+      const percentage = d3.format(".1%")(d.source.value / designerJobs); // Designer-specific percentage for this ribbon
+      return `<strong>${mapCaption.get(sourceDesigner.split(':')[0])}</strong> ${sourceDesigner.split(':')[1]} → <strong>${mapCaption.get(targetGroup.split(':')[0])}</strong> ${targetGroup.split(':')[1]}: <strong>${d3.format(",")(d.source.value)}</strong> ${mapCaption.get(f3)}, <strong>${percentage}</strong>`;
+    });
     // .text(d => `${names[d.source.index]} → ${mapCaption.get(names[d.target.index])}): ${d3.format(",.0f")(d.source.value)}\n${names[d.target.index]} → ${names[d.source.index]}: ${d3.format(",.0f")(d.source.value)}`);
-    // .html((d:any) => mapCaption.get(names[d.target.index].split(':')[0]) + ' <strong>' + names[d.target.index].split(':')[1] + '</strong><br/> with ' + mapCaption.get(names[d.source.index].split(':')[0]) + ' <strong>' + names[d.source.index].split(':')[1] + '</strong>: ' + d3.format(",.0f")(d.source.value) + ' Jobs, ' + d3.format(",.0f")(100 * d.source.value / 366000) + '%');
-    .html((d:any) => `<span>hi <strong>Mom ${total}</strong></span>`);
+    //.text(d => `${mapCaption.get(names[d.source.index].split(':')[0])} ${names[d.source.index].split(':')[1]} → ${mapCaption.get(names[d.target.index].split(':')[0])} ${names[d.target.index].split(':')[1]}: ${d3.format(",.0f")(d.source.value)} ${mapCaption.get(f3)}, ${d3.format(",.0f")(100 * d.source.value / total)}%`);
+    //.html((d:any) => `<span>hi <strong>Mom ${total}</strong></span>`);
   }
   
 }
