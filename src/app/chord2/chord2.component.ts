@@ -24,10 +24,15 @@ export class Chord2Component implements OnInit {
     let data: any[] = (dataX as any[]) || []
     let f1 = 'LENS_DESIGNER_CODE'
     let f2 = 'AR_COATING_GROUP_CODE'
+        let f3 = 'JOBS'
     let mapCaption = new Map()
     mapCaption.set(f1,'Designer')
     mapCaption.set(f2,'AR Group')
     
+    let total = 0
+    total = data.reduce((prev, curr) => { return prev += curr[f3]}, 0)
+    console.log({total})
+
     let dataZ : any[] = []
     data.forEach(d => {
       let z1 = {'Field1' : f1 + ':' + d[f1], 'Field2' : f2 + ':' + d[f2], 'JOBS' : d['JOBS'], 'SLS' : d['SLS']}
@@ -44,24 +49,28 @@ export class Chord2Component implements OnInit {
     // })
     console.log({data})
 
-    let f3 = 'JOBS'
+
     //get the colors 
     //const names1 = Array.from(new Set(data.map(d => f1 + ':' + d[f1])));
     //const names2 = Array.from(new Set(data.map(d => f2 + ':' + d[f2])));
 
-    const names1 = Array.from(new Set(data.map(d => d['Field1'])));
-    const names2 = Array.from(new Set(data.map(d => d['Field2'])));
+    const names1 = Array.from(new Set(data.filter(x => {return x['Field1'].indexOf(f1)===0}).map(d => d['Field1'])));
+    const names2 = Array.from(new Set(data.filter(x => {return x['Field2'].indexOf(f2)===0}).map(d => d['Field2'])));
+
+    // const names1 = Array.from(new Set(data.map(d => d['Field1'])));  
+    // const names2 = Array.from(new Set(data.map(d => d['Field2'])));
+
     const names = [...names1, ...names2]
     console.log(names)
     const matrix = Array(names.length).fill(0).map(() => Array(names.length).fill(0));
     let mColor = new Map()
     
     names1.forEach(n => {
-      mColor.set(n,"blue")
+      if (n.indexOf(f1)===0) {mColor.set(n,"blue")}
     })
 
     names2.forEach(n => {
-      mColor.set(n,"pink")
+      if (n.indexOf(f2)===0) {mColor.set(n,"pink")}
     })
 
     data.forEach(d => {
@@ -70,10 +79,10 @@ export class Chord2Component implements OnInit {
       matrix[sourceIndex][targetIndex] = +d[f3];
     });
 
-    this.drawChordDiagram(matrix, names, mColor, mapCaption);
+    this.drawChordDiagram(matrix, names, mColor, mapCaption, total);
   }
 
-  drawChordDiagram(matrix: number[][], names: string[], mColor: any, mapCaption: any): void {
+  drawChordDiagram(matrix: number[][], names: string[], mColor: any, mapCaption: any, total: number): void {
     const width = 1000;
     const height = 1000;
     const outerRadius = Math.min(width, height) * 0.5 - 50;
@@ -124,8 +133,9 @@ export class Chord2Component implements OnInit {
       .attr("stroke", d => d3.color(color(names[d.index]) as string)?.darker()?.toString() || "#000")
       .attr("d", arc as any)
       .append("title")
-      .text(d => `${names[d.index]}: ${d.value}`);
-
+      // .text(d => `${names[d.index]}: ${d.value}`);
+      .text(d => mapCaption.get(names[d.index].split(':')[0]) + ' ' + names[d.index].split(':')[1] + ': ' + d3.format(",.0f")(d.value) + ' Jobs, ' + d3.format(",.0f")(100 * d.value / total) + '%');
+      
       // Add labels to each segment (hair color)
       group.append("text")
       .attr("dy", ".35em")
@@ -179,9 +189,11 @@ export class Chord2Component implements OnInit {
     .attr("stroke", d => d3.color(color(names[d.source.index]) as string)?.darker()?.toString() || "#000")
     .style("opacity", d => Math.max(0.3, d.source.value / (d3.max(matrix.flat()) || 1)))
     .append("title")
-    .text(d => `${names[d.source.index]} → ${mapCaption.get(names[d.target.index])}): ${d.source.value}\n${names[d.target.index]} → ${names[d.source.index]}: ${d.target.value}`);
+    // .text(d => `${names[d.source.index]} → ${mapCaption.get(names[d.target.index])}): ${d3.format(",.0f")(d.source.value)}\n${names[d.target.index]} → ${names[d.source.index]}: ${d3.format(",.0f")(d.source.value)}`);
+    // .html((d:any) => mapCaption.get(names[d.target.index].split(':')[0]) + ' <strong>' + names[d.target.index].split(':')[1] + '</strong><br/> with ' + mapCaption.get(names[d.source.index].split(':')[0]) + ' <strong>' + names[d.source.index].split(':')[1] + '</strong>: ' + d3.format(",.0f")(d.source.value) + ' Jobs, ' + d3.format(",.0f")(100 * d.source.value / 366000) + '%');
+    .html((d:any) => `<span>hi <strong>Mom ${total}</strong></span>`);
   }
-
+  
 }
 
 //each segment represents a different hair color
