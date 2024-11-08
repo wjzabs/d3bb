@@ -59,6 +59,14 @@ export class Chord2Component implements OnInit {
       }
     });
 
+    const arGroupTotalJobs = new Map();
+data.forEach(d => {
+  if (d['Field2'].startsWith(f2)) {
+    const arGroup = d['Field2'];
+    arGroupTotalJobs.set(arGroup, (arGroupTotalJobs.get(arGroup) || 0) + d['JOBS']);
+  }
+});
+
     //get the colors 
     //const names1 = Array.from(new Set(data.map(d => f1 + ':' + d[f1])));
     //const names2 = Array.from(new Set(data.map(d => f2 + ':' + d[f2])));
@@ -88,16 +96,15 @@ export class Chord2Component implements OnInit {
       matrix[sourceIndex][targetIndex] = +d[f3];
     });
 
-    this.drawChordDiagram(matrix, names, mColor, mapCaption, total, designerTotalJobs, f1, f2, f3);
+    this.drawChordDiagram(matrix, names, mColor, mapCaption, total, designerTotalJobs, arGroupTotalJobs, f1, f2, f3);
   }
 
-  drawChordDiagram(matrix: number[][], names: string[], mColor: any, mapCaption: any, total: number, designerTotalJobs: Map<string, number>, f1: string, f2: string, f3: string): void {
+  drawChordDiagram(matrix: number[][], names: string[], mColor: any, mapCaption: any, total: number, designerTotalJobs: Map<string, number>, arGroupTotalJobs: Map<string, number>, f1: string, f2: string, f3: string): void {
     const width = 1000;
     const height = 1000;
     const outerRadius = Math.min(width, height) * 0.35;
     const innerRadius = outerRadius - 30;
 
-  
     const color = d3.scaleOrdinal() 
     .domain(names) 
     .range([ 
@@ -107,7 +114,7 @@ export class Chord2Component implements OnInit {
       "#d62728" // red 
     ]); 
   
-    
+    const tooltip = d3.select("#tooltip");
 
   //layout of circle, with a space between each
     const chord = d3.chord()
@@ -185,17 +192,24 @@ export class Chord2Component implements OnInit {
 
       //outer arc for each color
       group.append("path")
-      //.attr("fill", d => color(names[d.index]) as string)
-      .attr("fill", d => mColor.get(names[d.index]) as string)
-      .attr("stroke", d => d3.color(color(names[d.index]) as string)?.darker()?.toString() || "#000")
-      .attr("d", arc as any)
-      .append("title")
-      .html(d => {
-        const designer = names[d.index];
-        const designerJobs = designerTotalJobs.get(designer) || 1; 
-        const percentage = d3.format(".1%")(d.value / total); 
-        return `<strong>${mapCaption.get(designer.split(':')[0])}</strong> ${designer.split(':')[1]}: <strong>${d3.format(",")(d.value)}</strong> ${mapCaption.get(f3)}, <strong>${percentage}</strong>`;
-      });
+  .attr("fill", d => mColor.get(names[d.index]) as string)
+  .attr("stroke", d => d3.color(color(names[d.index]) as string)?.darker()?.toString() || "#000")
+  .attr("d", arc as any)
+  .on("mouseover", function(event, d) {
+    const designer = names[d.index];
+    const designerJobs = designerTotalJobs.get(designer) || 1;
+    const percentage = d3.format(".1%")(d.value / total);
+    const tooltipContent = `${mapCaption.get(names[d.index].split(':')[0])} <strong>${designer.split(':')[1]}</strong>: <strong>${d3.format(",")(d.value)}</strong> Jobs, <strong>${percentage}</strong>`;
+    
+    tooltip.style("visibility", "visible").html(tooltipContent);
+  })
+  .on("mousemove", function(event) {
+    tooltip.style("top", (event.pageY + 15) + "px")
+           .style("left", (event.pageX + 15) + "px");
+  })
+  .on("mouseout", function() {
+    tooltip.style("visibility", "hidden");
+  });
       // .text(d => `${names[d.index]}: ${d.value}`);
       //.text(d => `${mapCaption.get(names[d.index].split(':')[0])} ${names[d.index].split(':')[1]}: ${d3.format(",.0f")(d.value)} ${mapCaption.get(f3)}, ${d3.format(",.0f")(100 * d.value / total)}%`);
       // Add labels to each segment (hair color)
@@ -239,26 +253,56 @@ export class Chord2Component implements OnInit {
   });
 
   // Add the ribbons with gradient fills
+  // Add the ribbons with gradient fills
   svg.append("g")
-    .attr("fill-opacity", 0.75)
-    .selectAll("path")
-    .data(chords)
-    .join("path")
-    .attr("d", ribbon as any)
-    //.attr("fill", (d, i) => `url(#gradient${i})`)
-    .style(
-      "fill"
-      , function(d) { return mColor.get(names[d.source.index]); })
-    .attr("stroke", d => d3.color(color(names[d.source.index]) as string)?.darker()?.toString() || "#000")
-    .style("opacity", d => Math.max(0.3, d.source.value / (d3.max(matrix.flat()) || 1)))
-    .append("title")
-    .html(d => {
-      const sourceDesigner = names[d.source.index];
-      const targetGroup = names[d.target.index];
-      const designerJobs = designerTotalJobs.get(sourceDesigner) || 1;
-      const percentage = d3.format(".1%")(d.source.value / designerJobs); // Designer-specific percentage for this ribbon
-      return `<strong>${mapCaption.get(sourceDesigner.split(':')[0])}</strong> ${sourceDesigner.split(':')[1]} → <strong>${mapCaption.get(targetGroup.split(':')[0])}</strong> ${targetGroup.split(':')[1]}: <strong>${d3.format(",")(d.source.value)}</strong> ${mapCaption.get(f3)}, <strong>${percentage}</strong>`;
-    });
+  .attr("fill-opacity", 0.75)
+  .selectAll("path")
+  .data(chords)
+  .join("path")
+  .attr("d", ribbon as any)
+  .style("fill", function(d) { return mColor.get(names[d.source.index]); })
+  .attr("stroke", d => d3.color(color(names[d.source.index]) as string)?.darker()?.toString() || "#000")
+  .style("opacity", d => Math.max(0.3, d.source.value / (d3.max(matrix.flat()) || 1)))
+  .on("mouseover", function (event, d) {
+    const sourceMidAngle = (d.source.startAngle + d.source.endAngle) / 2;
+    const targetMidAngle = (d.target.startAngle + d.target.endAngle) / 2;
+
+    const mouseX = event.clientX;
+    const mouseY = event.clientY;
+
+    const sourceX = Math.cos(sourceMidAngle - Math.PI / 2) * innerRadius + width / 2;
+    const sourceY = Math.sin(sourceMidAngle - Math.PI / 2) * innerRadius + height / 2;
+    const targetX = Math.cos(targetMidAngle - Math.PI / 2) * innerRadius + width / 2;
+    const targetY = Math.sin(targetMidAngle - Math.PI / 2) * innerRadius + height / 2;
+
+    const distToSource = Math.hypot(mouseX - sourceX, mouseY - sourceY);
+    const distToTarget = Math.hypot(mouseX - targetX, mouseY - targetY);
+
+    let tooltipContent;
+    if (distToSource < distToTarget) { // Closer to source
+        const sourceDesigner = names[d.source.index];
+        const targetGroup = names[d.target.index];
+        const designerJobs = designerTotalJobs.get(sourceDesigner) || 1;
+        const percentage = d3.format(".1%")(d.source.value / designerJobs);
+        tooltipContent = `${mapCaption.get(sourceDesigner.split(':')[0])} <strong>${sourceDesigner.split(':')[1]}</strong> → ${mapCaption.get(targetGroup.split(':')[0])} <strong>${targetGroup.split(':')[1]}</strong>: <strong>${d3.format(",")(d.source.value)}</strong> ${mapCaption.get(f3)}, <strong>${percentage}</strong>`;
+    } else { // Closer to target
+        const targetGroup = names[d.target.index];
+        const sourceDesigner = names[d.source.index];
+        const groupJobs = arGroupTotalJobs.get(targetGroup) || 1;
+        const percentage = d3.format(".1%")(d.target.value / groupJobs);
+        tooltipContent = `${mapCaption.get(targetGroup.split(':')[0])} <strong>${targetGroup.split(':')[1]}</strong> → ${mapCaption.get(sourceDesigner.split(':')[0])} <strong>${sourceDesigner.split(':')[1]}</strong>: <strong>${d3.format(",")(d.target.value)}</strong> ${mapCaption.get(f3)}, <strong>${percentage}</strong>`;
+    }
+
+    tooltip.style("visibility", "visible")
+        .html(tooltipContent);
+  })
+  .on("mousemove", function (event) {
+    tooltip.style("top", (event.pageY + 15) + "px")
+        .style("left", (event.pageX + 15) + "px");
+  })
+  .on("mouseout", function () {
+    tooltip.style("visibility", "hidden");
+  });
     // .text(d => `${names[d.source.index]} → ${mapCaption.get(names[d.target.index])}): ${d3.format(",.0f")(d.source.value)}\n${names[d.target.index]} → ${names[d.source.index]}: ${d3.format(",.0f")(d.source.value)}`);
     //.text(d => `${mapCaption.get(names[d.source.index].split(':')[0])} ${names[d.source.index].split(':')[1]} → ${mapCaption.get(names[d.target.index].split(':')[0])} ${names[d.target.index].split(':')[1]}: ${d3.format(",.0f")(d.source.value)} ${mapCaption.get(f3)}, ${d3.format(",.0f")(100 * d.source.value / total)}%`);
     //.html((d:any) => `<span>hi <strong>Mom ${total}</strong></span>`);
