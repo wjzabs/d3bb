@@ -1,0 +1,550 @@
+import { Component } from '@angular/core';
+import * as d3 from "d3";
+
+@Component({
+  selector: 'app-stacked',
+  standalone: true,
+  imports: [],
+  templateUrl: './stacked.component.html',
+  styleUrl: './stacked.component.scss'
+})
+export class StackedComponent {
+
+  constructor() {
+  }
+
+  async ngOnInit() {
+    // await drawBars()
+    await drawStacks()
+  }
+}
+
+
+async function drawBars() {
+
+  // 1. Access data 
+  // const dataset = await d3.json("./data/my_weather_data.json")
+  const dataset = await <Promise<any[]>>d3.json("assets/weather.json")
+  // console.table(dataset[0])
+
+  // 2. Create chart dimensions
+
+  const width = 500
+  let dimensions = {
+    width: width,
+    height: width * 0.6,
+    margin: {
+      top: 80,
+      right: 50,
+      bottom: 50,
+      left: 50,
+    },
+    boundedWidth: 0,
+    boundedHeight: 0
+  }
+  dimensions.boundedWidth = dimensions.width
+    - dimensions.margin.left
+    - dimensions.margin.right
+  dimensions.boundedHeight = dimensions.height
+    - dimensions.margin.top
+    - dimensions.margin.bottom
+
+  const drawHistogram = (metric: string) => {
+    const metricAccessor = (d:any) => d[metric]
+    const yAccessor = (d:any) => d.length
+
+  // 3. Draw canvas
+
+    const wrapper2 = d3.select("#wrapper2")
+      .append("svg")
+        .attr("width", dimensions.width)
+        .attr("height", dimensions.height)
+
+    const bounds = wrapper2.append("g")
+        .style("transform", `translate(${dimensions.margin.left}px, ${dimensions.margin.top}px)`)
+
+  // 4. Create scales
+
+    const xScale = d3.scaleLinear()
+      .domain(d3.extent(dataset, metricAccessor) as Iterable<number>)
+      .range([0, dimensions.boundedWidth])
+      .nice()
+
+      console.log(xScale.domain())
+    const xDomain = <[number,number]>xScale.domain()
+
+    const binsGenerator = d3.bin()
+      .domain(xScale.domain() as [number,number])
+      // .domain(xDomain) // this works too
+      .value(metricAccessor)
+      .thresholds(8)
+
+    const bins = binsGenerator(dataset)
+
+    const yScale = d3.scaleLinear()
+      .domain([0, d3.max(bins, yAccessor)])
+      .range([dimensions.boundedHeight, 0])
+      .nice()
+
+    // 5. Draw data
+
+    const binGroups = bounds.selectAll("g")
+      .data(bins)
+      .enter().append("g")
+
+    const barPadding = 1
+    const barRects = binGroups.append("rect")
+        .attr("x", (d:any) => xScale(d.x0) + barPadding / 2)
+        .attr("y", (d:any) => yScale(yAccessor(d))) 
+
+        .attr("width", (d:any) => xScale(d.x1) - xScale(d.x0) - barPadding ) // ******************************************
+
+        // .attr("width", (d:any) => d3.max([
+        //   0,
+        //   xScale(d.x1) - xScale(d.x0) - barPadding
+        // ]))
+
+        .attr("height", (d:any) => dimensions.boundedHeight - yScale(yAccessor(d)))
+        .attr("fill", "cornflowerblue")
+
+    const barText = binGroups.filter(yAccessor)
+      .append("text")
+        .attr("x", (d:any) => xScale(d.x0) + (xScale(d.x1) - xScale(d.x0)) / 2)
+        .attr("y", (d:any) => yScale(yAccessor(d)) - 5)
+        .text(yAccessor)
+        .style("text-anchor", "middle")
+        .attr("fill", "darkgrey")
+        .style("font-size", "12px")
+        .style("font-family", "sans-serif")
+
+    const mean = d3.mean(dataset, metricAccessor)
+    const meanLine = bounds.append("line")
+        .attr("x1", xScale(mean as number))
+        .attr("x2", xScale(mean as number))
+        .attr("y1", -15)
+        .attr("y2", dimensions.boundedHeight)
+        .attr("stroke", "maroon")
+        .attr("stroke-dasharray", "2px 4px")
+
+    const meanLabel = bounds.append("text")
+        .attr("x", xScale(mean as number))
+        .attr("y", -20)
+        .text("mean")
+        .attr("fill", "maroon")
+        .style("font-size", "12px")
+        .style("text-anchor", "middle")
+
+    // 6. Draw peripherals
+
+    const xAxisGenerator = d3.axisBottom(xScale)
+      // .scale(xScale)
+
+    const xAxis = bounds.append("g")
+      .call(xAxisGenerator)
+        .style("transform", `translateY(${dimensions.boundedHeight}px)`)
+
+    const xAxisLabel = xAxis.append("text")
+        .attr("x", dimensions.boundedWidth / 2)
+        .attr("y", dimensions.margin.bottom - 10)
+        .attr("fill", "black")
+        .style("font-size", "1.4em")
+        .text(metric)
+        .style("text-transform", "capitalize")
+  }
+
+  const metrics = [
+    "windSpeed",
+  ]
+
+  metrics.forEach(drawHistogram)
+}
+
+
+async function drawStacks() {
+  
+// https://observablehq.com/@d3/diverging-stacked-bar-chart/2
+// https://blog.datawrapper.de/divergingbars/
+
+
+  // 1. Access data
+  // there are 2 dimensions - bars and categories
+  // categories (should be no more than 10, ideally 4-6) will have a tile across the top of the chart
+  
+  // const dataset = await d3.json("./data/my_weather_data.json")
+  const categories = await <Promise<any[]>>d3.json("assets/stacks-categories.json")
+  // console.table(categories)
+  const bars = await <Promise<any[]>>d3.json("assets/stacks-bars.json")
+  // console.table(bars)
+  
+  const dataset = stacks_generate_dataset(categories, bars)
+  // console.table(dataset)
+
+  // const data = stacks_get_data(categories[0].CATEGORY_CODE, categories, dataset)
+  // console.log(data)
+
+  const results = stacks_get_data(categories[0].CATEGORY_CODE, categories, dataset)
+  const data = results.data
+  const options = results.options
+
+
+
+
+
+  // Assign a valence to each category.
+  const signs = new Map([].concat(
+    options.negatives.map((d:any) => [d, -1]),
+    options.positives.map((d:any) => [d, +1])
+  ));
+
+  console.log(signs)
+
+  // Compute the bias = sum of negative values for each candidate.
+  const bias = d3.sort(
+    d3.rollup(data, v => d3.sum(v, (d:any) => {return d.value * Math.min(0, (signs.get(d.category) as number)) }), (d:any) => d.name),
+    ([, a]) => a
+  );
+
+  // Specify the chart’s dimensions, with a space of height 33px for each candidate.
+  const width = 928;
+  const marginTop = 40;
+  const marginRight = 30;
+  const marginBottom = 0;
+  const marginLeft = 80;
+  const height = bias.length * 33 + marginTop + marginBottom;
+
+
+//   const series2 = d3
+//   .stack()
+//   .keys([].concat(options.negatives.slice().reverse(), options.positives))
+//   .value(
+//     ([, value]:any, category) => (signs.get(category) as number) * (value.get(category) || 0)
+//   )
+//   .offset(d3.stackOffsetDiverging)(
+//   d3.rollups(
+//     data,
+//     (data:any) =>
+//       d3.rollup(
+//         data,
+//         ([d]: any) => d.value,
+//         (d:any) => d.category
+//       ),
+//     (d:any) => d.name
+//   )
+// );
+
+
+  // // Prepare the stack; the values are stacked from the inside out, starting with more
+  // // moderate values (“mostly false”, “half true”), and ending with the extreme values.
+  // const series = d3.stack()
+  //   .keys([].concat(data.negatives.slice().reverse(), data.positives))
+  //   // .value(([, value], category) => (signs.get(category) as number) * (value.get(category) as number))
+  //   .value(([, value]: any, category: any) => (signs.get(category) as number) * (value.get(category) || 0)
+  //   .offset(d3.stackOffsetDiverging)
+  //   (d3.rollup(data, data => d3.rollup(data, 
+  //     ([d]) => d.value, 
+  //     d => d.category), 
+  //     d => d.name));
+
+  // (d3.rollup(data, (data: any[]) => {return d3.rollup(data, 
+  //   ([d]: any[]) => {return d.value}, 
+  //   (d:any) => {return d.category}), 
+  //   (d:any) => {return d.name})
+  // });
+
+// Iterable<{ [key: string]: number; }
+
+
+
+
+  // const stack = series(data) // from the suggestion below - and using stack instead of series in .data
+// https://www.geeksforgeeks.org/d3-js-stackorderinsideout-method/
+// https://www.geeksforgeeks.org/d3-js-stack-order-method/
+//   var data = [ 
+//     { letter: { a: 3840, b: 1920, c: 960, d: 400 } }, 
+//     { letter: { a: 1600, b: 1440, c: 960, d: 400 } }, 
+//     { letter: { a: 640, b: 960, c: 640, d: 400 } }, 
+//     { letter: { a: 320, b: 480, c: 640, d: 400 } } 
+// ]; 
+// var stackGen = d3.stack() 
+//     // Defining keys 
+//     .keys(["a", "b", "c", "d"]) 
+//     // Defining value function 
+//     .value((obj, key) => obj.letter[key]); 
+// var stack = stackGen(data); 
+
+
+// console.log({series, stack})
+
+
+
+
+
+
+  // // Construct the scales.
+  // const x = d3.scaleLinear()
+  //   .domain(d3.extent(series.flat(2)))
+  //   .rangeRound([marginLeft, width - marginRight])
+
+  // const y = d3.scaleBand()
+  //   .domain(bias.map(([name]) => name))
+  //   .rangeRound([marginTop, height - marginBottom])
+  //   .padding(2 / 33)
+
+  // const color = d3.scaleOrdinal()
+  //   .domain([].concat(data.negatives, data.positives))
+  //   .range(d3.schemeSpectral[data.negatives.length + data.positives.length])
+
+  // // A function to format a percentage, used both on the axis and in the tooltips.
+  // const formatValue = ((format) => (x) => format(Math.abs(x)))(d3.format(".0%"));
+
+  // // Create the SVG container.
+  // const svg = d3.create("svg")
+  //     .attr("viewBox", [0, 0, width, height])
+  //     .attr("style", "max-width: 100%; height: auto; font: 10px sans-serif;");
+
+  // // Append a rect for each value, with a tooltip.
+  // svg.append("g")
+  //   .selectAll("g")
+  //   // .data(series)
+  //   .data(stack)
+  //   .join("g")
+  //     .attr("fill", (d:any) => {return color(d.key)})
+  //   .selectAll("rect")
+  //   .data(d => d.map(v => Object.assign(v, {key: d.key})))
+  //   .join("rect")
+  //     .attr("x", d => x(d[0]))
+  //     .attr("y", ({data: [name]}) => y(name))
+  //     .attr("width", d => x(d[1]) - x(d[0]))
+  //     .attr("height", y.bandwidth())
+  //   .append("title")
+  //     .text(({key, data: [name, value]}) => `${name} ${formatValue(value.get(key))} ${key}`);
+
+  // // Create the axes.
+  // svg.append("g")
+  //     .attr("transform", `translate(0,${marginTop})`)
+  //   .call(d3.axisTop(x)
+  //       .ticks(width / 80)
+  //       .tickFormat(formatValue)
+  //       .tickSizeOuter(0))
+  //   .call(g => g.select(".domain").remove())
+  //   .call(g => g.append("text")
+  //       .attr("x", x(0) + 20)
+  //       .attr("y", -24)
+  //       .attr("fill", "currentColor")
+  //       .attr("text-anchor", "start")
+  //       .text(data.positive))
+  //   .call(g => g.append("text")
+  //       .attr("x", x(0) - 20)
+  //       .attr("y", -24)
+  //       .attr("fill", "currentColor")
+  //       .attr("text-anchor", "end")
+  //       .text(data.negative));
+
+  // svg.append("g")
+  //   .call(d3.axisLeft(y).tickSizeOuter(0))
+  //   .call(g => g.selectAll(".tick").data(bias).attr("transform", ([name, min]) => `translate(${x(min)},${y(name) + y.bandwidth() / 2})`))
+  //   .call(g => g.select(".domain").attr("transform", `translate(${x(0)},0)`));
+
+  // Return the color scale as a property of the node, for the legend.
+  // return Object.assign(svg.node(), {scales: {color}});
+  
+
+}
+
+function stacks_get_data(selectedCATEGORY_CODE: string, categories: any[], dataset: any[]): any {
+  let catgys = <any>{};
+  categories.forEach((c:any) => {
+    catgys[c.CATEGORY_CODE] = c.CATEGORY_DESC
+  })
+  
+  let selectedCATEGORY = categories.find((x:any) => {return x.CATEGORY_CODE === selectedCATEGORY_CODE})
+  // const catgys = {
+  //   "pants-fire": "Pants on fire!",
+  //   "false": "False",
+  //   "mostly-false": "Mostly false",
+  //   "barely-true": "Mostly false", // recategorized
+  //   "half-true": "Half true",
+  //   "mostly-true": "Mostly true",
+  //   "true": "True"
+  // };
+
+  // const data = d3.csvParse(await FileAttachment("politifact.csv").text(), ({speaker: name, ruling: category, count: value}) => categories[category] ? {name, category: categories[category], value: +value} : null);
+
+  let data: any[] = []
+  dataset.forEach((d:any) => {
+    let c = categories.find((x:any) => {return x.CATEGORY_CODE === d.CATEGORY_CODE})
+    let o = {name: c.CATEGORY_DESC, category: d.CATEGORY_CODE, value: +d.PCT}
+    data.push(o)
+  })
+
+
+
+  // Normalize absolute values to percentage.
+  d3.rollup(data, group => {
+    const sum = d3.sum(group, d => d.value);
+    for (const d of group) d.value /= sum;
+  }, d => d.name);
+
+  // let result = Object.assign(data, {
+  //   columns: ["speaker", "ruling", "count"],
+  //   negative: "← Others",
+  //   positive: selectedCATEGORY_CODE + " →",
+  //   // negatives: ["Pants on fire!", "False", "Mostly false"],
+  //   // positives: ["Half true", "Mostly true", "True"]
+  //   negatives: [...categories
+  //     .filter((x:any) => {return x.CATEGORY_CODE !== selectedCATEGORY_CODE})
+  //     .map((x:any) => {return x.CATEGORY_DESC})],
+  //   positives: [selectedCATEGORY.CATEGORY_DESC]
+  // });
+
+  let result = {data: Object.assign(data), options: {
+    columns: ["speaker", "ruling", "count"],
+    negative: "← Others",
+    positive: selectedCATEGORY_CODE + " →",
+    negatives: [...categories
+      .filter((x:any) => {return x.CATEGORY_CODE !== selectedCATEGORY_CODE})
+      .map((x:any) => {return x.CATEGORY_DESC})],
+    positives: [selectedCATEGORY.CATEGORY_DESC]
+  }};
+
+  console.log({result})
+  return result
+}
+
+
+function stacks_generate_dataset(categories: any[], bars: any[]): any[] {
+  let dataset = <any>[]
+  
+  categories.forEach((c:any) => {
+
+    let bd = <any>[]
+    bars.forEach((b:any) => {
+      let v = +(1000 * Math.random()).toFixed(0)
+      if (v<200) {v = 0}
+      let d = {CATEGORY_CODE: c.CATEGORY_CODE, BAR_CODE: b.BAR_CODE, VALUE: v, PCT: 0}
+      bd.push(d)
+    })
+
+    let t = bd.reduce(function (acc:number, obj:any) { return acc + obj.VALUE }, 0);
+    // console.log({bd, c, t})
+    bd.forEach((b:any) => {
+      let v = b.VALUE
+      b.PCT = +(100 * v/t).toFixed(2)
+    })
+
+    dataset.push (...bd)
+  }) 
+  
+  return dataset
+
+}
+
+async function test() {
+
+
+
+
+
+  
+  // 1. Access data
+  // there are 2 dimensions - bars and categories
+  // categories (should be no more than 10, ideally 4-6) will have a tile across the top of the chart
+  
+  const categories = await <Promise<any[]>>d3.json("assets/stacks-categories.json")
+  const bars = await <Promise<any[]>>d3.json("assets/stacks-bars.json")
+  
+  const dataset = stacks_generate_dataset(categories, bars)
+  // console.table(dataset)
+
+  const results = stacks_get_data(categories[0].CATEGORY_CODE, categories, dataset)
+  const data = results.data
+  const options = results.options
+
+  // Assign a valence to each category.
+  const signs = new Map([].concat(
+    options.negatives.map((d:any) => [d, -1]),
+    options.positives.map((d:any) => [d, +1])
+  ));
+
+  console.log(signs)
+
+  // Compute the bias = sum of negative values for each candidate.
+  const bias = d3.sort(
+    d3.rollup(data, v => d3.sum(v, (d:any) => {return d.value * Math.min(0, (signs.get(d.category) as number)) }), (d:any) => d.name),
+    ([, a]) => a
+  );
+
+
+
+
+
+
+
+interface DataItem {
+  category: string;
+  value: number;
+  group: string;
+}
+
+const data: DataItem[] = [
+  // Your data here
+];
+
+const width = 960;
+const height = 500;
+const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+
+const x = d3
+  .scaleBand()
+  .domain(data.map((d) => d.group))
+  .range([margin.left, width - margin.right])
+  .padding(0.1);
+
+const y = d3
+  .scaleLinear()
+  .domain([
+    d3.min(data, (d) => d.value)!,
+    d3.max(data, (d) => d.value)!,
+  ])
+  .range([height - margin.bottom, margin.top]);
+
+const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+const svg = d3
+  .create("svg")
+  .attr("width", width)
+  .attr("height", height);
+
+const stack = d3
+  .stack<DataItem>()
+  .keys(data.map((d) => d.category))
+  .offset(d3.stackOffsetDiverging);
+
+const series = stack(data);
+
+svg
+  .append("g")
+  .selectAll("g")
+  .data(series)
+  .join("g")
+  .attr("fill", (d) => color(d.key))
+  .selectAll("rect")
+  .data((d) => d)
+  .join("rect")
+  .attr("x", (d) => x(d.data.group)!)
+  .attr("y", (d) => y(d[1]))
+  .attr("height", (d) => y(d[0]) - y(d[1]))
+  .attr("width", x.bandwidth());
+
+svg
+  .append("g")
+  .attr("transform", `translate(0,${height - margin.bottom})`)
+  .call(d3.axisBottom(x));
+
+svg
+  .append("g")
+  .attr("transform", `translate(${margin.left},0)`)
+  .call(d3.axisLeft(y));
+
+document.body.appendChild(svg.node()!);
+}

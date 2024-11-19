@@ -1,0 +1,7 @@
+[
+{"BAR_CODE": "CLARIS", "BAR_DESC": "Claris", "icon": "clear-day"},
+{"BAR_CODE": "SHAMIR", "BAR_DESC": "Shamir", "icon": "partly-cloudy-night"},
+{"BAR_CODE": "UNITY", "BAR_DESC": "Unity", "icon": "fog"},
+{"BAR_CODE": "CRIZAL", "BAR_DESC": "Crizal", "icon": "rain"},
+{"BAR_CODE": "NONE", "BAR_DESC": "No AR", "icon": "cloudy"}
+]

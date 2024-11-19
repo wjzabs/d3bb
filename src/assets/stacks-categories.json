@@ -1,0 +1,7 @@
+[
+{"CATEGORY_CODE": "SHAMIR", "CATEGORY_DESC": "Shamir", "icon": "clear-day"},
+{"CATEGORY_CODE": "YOUNGER", "CATEGORY_DESC": "Younger", "icon": "partly-cloudy-night"},
+{"CATEGORY_CODE": "ESSILOR", "CATEGORY_DESC": "Essilor", "icon": "fog"},
+{"CATEGORY_CODE": "HORIZON", "CATEGORY_DESC": "Horizon", "icon": "rain"},
+{"CATEGORY_CODE": "DEL", "CATEGORY_DESC": "Digital 5.0", "icon": "cloudy"}
+]

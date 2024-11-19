@@ -17,6 +17,7 @@ import { Mapsales2Component } from './mapsales2/mapsales2.component';
 import { AbblabhComponent } from './abblabh/abblabh.component';
 import { Chord2Component } from './chord2/chord2.component';
 import { BarchartComponent } from './barchart/barchart.component';
+import { StackedComponent } from './stacked/stacked.component';
 
 export const routes: Routes = [
     {path: '', component: BaseballComponent},
@@ -38,5 +39,5 @@ export const routes: Routes = [
     {path: 'chord', component: AbblabhComponent},
     {path: 'chord2', component: Chord2Component},
     {path: 'barchart', component: BarchartComponent},
-    
+    {path: 'stacked', component: StackedComponent}, 
 ];
