@@ -5,9 +5,21 @@ import {
     OnInit,
     ViewEncapsulation
   } from "@angular/core";
-  import { DivergingBarModel } from "./models/charts.model";
+//   import { DivergingBarModel } from "./models/charts.model";
   import { D3Service } from "./services/d3.service";
   
+  // https://stackblitz.com/edit/angular-d3-js-bar-diverging-bar?file=src%2Fapp%2Fapp.component.ts,package.json
+
+  
+export interface StackedDataItem {
+    position: number,
+    name: string,
+    category: string,
+    bar: string,
+    value: number,
+    color?: string
+}
+
   @Component({
     selector: 'app-stacked',
     standalone: true,
@@ -16,35 +28,38 @@ import {
     styleUrl: './stacked.component.scss',
     encapsulation: ViewEncapsulation.None
   })
-
   export class StackedComponent implements AfterViewInit {
-    @Input("data") private data: DivergingBarModel[] = [];
+    // @Input("data") private data: DivergingBarModel[] = [];
+    @Input("data") private data: StackedDataItem[] = [];
+    
     @Input("legendTitle") legendTitle: string = 'legendTitle';
     @Input("legendSubtitle") legendSubtitle: string = 'legendSubtitle';
     public chartId: string;
     constructor(private d3: D3Service) {
       this.chartId = this.d3.generateId(5);
 
-      this.data = [
-        { position: 0, name: "Pie 1", value: 10 },
-        { position: 1, name: "Pie 2", value: 20 },
-        { position: 2, name: "Pie 3", value: 30 },
-        { position: 3, name: "Pie 4", value: 40 },
-        { position: 4, name: "Pie 5", value: -50 },
-        { position: 5, name: "Pie 6", value: 60 },
-        { position: 6, name: "Pie 7", value: 70 },
-        { position: 7, name: "Pie 8", value: 80 },
-        { position: 8, name: "Pie 9", value: 90 },
-        { position: 9, name: "Pie 10", value: -100 },
-        { position: 10, name: "Pie 11", value: 110 },
-        { position: 11, name: "Pie 12", value: -120 },
-        { position: 12, name: "Pie 13", value: 130 },
-        { position: 13, name: "Pie 14", value: 140 },
-        { position: 14, name: "Pie 15", value: 150 },
-        { position: 15, name: "Pie 16", value: 100 },
-        { position: 15, name: "Pie 16", value: 60 },
-        { position: 15, name: "Pie 16", value: -60 }
-      ];
+    // {name: 'Shamir', category: 'SHAMIR', value: 0.11728827117288271}
+
+    //   this.data = [
+    //     { position: 0, name: "Pie 1", value: 10 },
+    //     { position: 1, name: "Pie 2", value: 20 },
+    //     { position: 2, name: "Pie 3", value: 30 },
+    //     { position: 3, name: "Pie 4", value: 40 },
+    //     { position: 4, name: "Pie 5", value: -50 },
+    //     { position: 5, name: "Pie 6", value: 60 },
+    //     { position: 6, name: "Pie 7", value: 70 },
+    //     { position: 7, name: "Pie 8", value: 80 },
+    //     { position: 8, name: "Pie 9", value: 90 },
+    //     { position: 9, name: "Pie 10", value: -100 },
+    //     { position: 10, name: "Pie 11", value: 110 },
+    //     { position: 11, name: "Pie 12", value: -120 },
+    //     { position: 12, name: "Pie 13", value: 130 },
+    //     { position: 13, name: "Pie 14", value: 140 },
+    //     { position: 14, name: "Pie 15", value: 150 },
+    //     { position: 15, name: "Pie 16", value: 100 },
+    //     { position: 16, name: "Pie 16", value: 60 },
+    //     { position: 17, name: "Pie 16", value: -60 }
+    //   ];
      
     }
   
@@ -56,20 +71,32 @@ import {
 
 
   const categories = await <Promise<any[]>>this.d3.d3.json("assets/stacks-categories.json")
-  // console.table(categories)
+  console.table(categories)
   const barsData = await <Promise<any[]>>this.d3.d3.json("assets/stacks-bars.json")
-  // console.table(barsData)
+  console.table(barsData)
     const dataset = this.stacks_generate_dataset(categories, barsData)
-  // console.table(dataset)
+  console.table(dataset)
 
   const results = this.stacks_get_data(categories[0].CATEGORY_CODE, categories, dataset)
-  const data = results.data
+  this.data = results.data
   const options = results.options
 
+  const signs = new Map([].concat(
+    options.negatives.map((d:any) => [d, -1]),
+    options.positives.map((d:any) => [d, +1])
+  ));
 
+  console.log(signs)
 
+//   const bias = this.d3.d3.sort(
+//     this.d3.d3.rollup(this.data, v => this.d3.d3.sum(v, (d:any) => {return d.value * Math.min(0, (signs.get(d.category) as number)) }), (d:any) => d.name),
+//     ([, a]) => a
+//   );
 
-
+this.data.forEach((d:StackedDataItem) => {
+    // console.log({d, sign: signs.get(d.category), value: d.value, calc: Math.abs(d.value) * (signs.get(d.category) as number)})
+    d.value = Math.abs(d.value) * (signs.get(d.category) as number)
+})
 
       var margin = { top: 40, right: 50, bottom: 60, left: 50 };
   
@@ -177,6 +204,8 @@ import {
   
       var bars = svg.append("g").attr("class", "bars");
   
+      const formatValue = ((format) => (x:number) => format(Math.abs(x)))(this.d3.d3.format(".0%"));
+
       bars
         .selectAll("rect")
         .data(this.data)
@@ -196,7 +225,12 @@ import {
         })
         .style("fill", function(d) {
           return d.color ? d.color : colour(d.value);
-        });
+        })
+        .append("title")
+        // .text(({category, data: [name, value]}) => `${name}
+        // ${formatValue(value.get(category))} ${category}`);
+        .text(({category, name, bar, value}) => `${name}
+        ${formatValue(value)} ${bar}`);
   
       var labels = svg.append("g").attr("class", "labels");
   
@@ -236,7 +270,7 @@ import {
           let bd = <any>[]
           bars.forEach((b:any) => {
             let v = +(1000 * Math.random()).toFixed(0)
-            if (v<200) {v = 0}
+            // if (v<100) {v = 0}
             let d = {CATEGORY_CODE: c.CATEGORY_CODE, BAR_CODE: b.BAR_CODE, VALUE: v, PCT: 0}
             bd.push(d)
           })
@@ -280,7 +314,7 @@ stacks_get_data(selectedCATEGORY_CODE: string, categories: any[], dataset: any[]
     let data: any[] = []
     dataset.forEach((d:any) => {
       let c = categories.find((x:any) => {return x.CATEGORY_CODE === d.CATEGORY_CODE})
-      let o = {name: c.CATEGORY_DESC, category: d.CATEGORY_CODE, value: +d.PCT}
+      let o = {name: c.CATEGORY_DESC, category: d.CATEGORY_CODE, bar: d.BAR_CODE, value: +d.PCT}
       data.push(o)
     })
   
@@ -305,13 +339,13 @@ stacks_get_data(selectedCATEGORY_CODE: string, categories: any[], dataset: any[]
     // });
   
     let result = {data: Object.assign(data), options: {
-      columns: ["speaker", "ruling", "count"],
+      columns: ["name", "category", "value"],
       negative: "← Others",
       positive: selectedCATEGORY_CODE + " →",
       negatives: [...categories
         .filter((x:any) => {return x.CATEGORY_CODE !== selectedCATEGORY_CODE})
-        .map((x:any) => {return x.CATEGORY_DESC})],
-      positives: [selectedCATEGORY.CATEGORY_DESC]
+        .map((x:any) => {return x.CATEGORY_CODE})],
+      positives: [selectedCATEGORY.CATEGORY_CODE]
     }};
   
     console.log({result})
