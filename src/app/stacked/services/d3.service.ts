@@ -13,7 +13,7 @@ export class D3Service {
    * Generates random letter string with specified length
    * @param length: number
    */
-  public generateId(length:number): string {
+  public generateId(length: number): string {
     var result = '';
     var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
     var charactersLength = characters.length;
